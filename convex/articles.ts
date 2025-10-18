@@ -12,10 +12,11 @@ export const createArticle = mutation({
   returns: v.id("articles"),
   handler: async (ctx) => {
     // Get the authenticated user
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("Not authenticated");
     }
+    const userId = identity.subject;
 
     // Create article with empty content (TipTap will initialize it)
     const articleId = await ctx.db.insert("articles", {
@@ -50,10 +51,11 @@ export const listArticles = query({
     continueCursor: v.string(),
   }),
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("Not authenticated");
     }
+    const userId = identity.subject;
 
     // Query articles by user, ordered by creation time (newest first)
     const result = await ctx.db
@@ -92,10 +94,11 @@ export const getArticle = query({
     v.null()
   ),
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("Not authenticated");
     }
+    const userId = identity.subject;
 
     const article = await ctx.db.get(args.articleId);
     
@@ -118,10 +121,11 @@ export const updateTitle = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("Not authenticated");
     }
+    const userId = identity.subject;
 
     const article = await ctx.db.get(args.articleId);
     
@@ -149,10 +153,11 @@ export const updateContent = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("Not authenticated");
     }
+    const userId = identity.subject;
 
     const article = await ctx.db.get(args.articleId);
     
