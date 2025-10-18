@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ConvexClientProvider } from "@/providers/ConvexClientProvider";
 
 export const metadata: Metadata = {
-  title: "My App",
-  description: "Built with Next.js and Convex",
+  title: "Omori",
+  description: "A minimalistic article editor",
 };
 
 export default function RootLayout({
@@ -12,9 +13,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased">
-        {children}
+    <html lang="en" className="dark">
+      <body className="bg-black text-white min-h-screen antialiased">
+        <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>
     </html>
   );
