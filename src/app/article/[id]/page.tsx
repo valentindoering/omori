@@ -35,7 +35,7 @@ function ArticleEditor() {
   const [title, setTitle] = useState("");
   const [isNewArticle, setIsNewArticle] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const titleSaveTimeoutRef = useRef<NodeJS.Timeout>();
+  const titleSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Initialize title when article loads
   useEffect(() => {

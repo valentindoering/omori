@@ -20,8 +20,8 @@ interface EditorProps {
 }
 
 export function Editor({ content, onUpdate }: EditorProps) {
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
-  const periodicSaveRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const periodicSaveRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const editor = useEditor({
     extensions: [StarterKit],
