@@ -71,14 +71,14 @@ function ArticleEditor() {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-gray-500">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen">
       {/* Header with back button */}
       <div className="border-b border-gray-800">
         <div className="max-w-4xl mx-auto px-8 py-4">

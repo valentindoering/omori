@@ -46,7 +46,7 @@ function ArticlesList() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen">
       {/* Header */}
       <div className="border-b border-gray-800">
         <div className="max-w-6xl mx-auto px-8 py-4 flex items-center justify-between">
