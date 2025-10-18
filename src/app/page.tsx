@@ -7,6 +7,7 @@ import { api } from "../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { Plus, ChevronLeft } from "lucide-react";
+import Image from "next/image";
 
 /**
  * Main articles list page.
@@ -50,13 +51,22 @@ function ArticlesList() {
       {/* Header */}
       <div>
         <div className="max-w-6xl mx-auto px-8 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">omori</h1>
+          <div className="flex items-center gap-3">
+            <Image 
+              src="/favicon.ico" 
+              alt="omori logo" 
+              width={24} 
+              height={24}
+              className="rounded"
+            />
+            <h1 className="text-2xl font-bold mb-1">omori</h1>
+          </div>
           <UserMenu />
         </div>
       </div>
 
       {/* Main content */}
-      <div className="max-w-6xl mx-auto px-8 py-8">
+      <div className="max-w-6xl mx-auto px-8 py-2">
         {/* Create button */}
         <div className="flex justify-end mb-2">
           <button

@@ -174,3 +174,28 @@ export const updateContent = mutation({
   },
 });
 
+/**
+ * Delete an article.
+ */
+export const deleteArticle = mutation({
+  args: {
+    articleId: v.id("articles"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = identity.subject;
+
+    const article = await ctx.db.get(args.articleId);
+    if (!article || article.userId !== userId) {
+      throw new Error("Article not found or unauthorized");
+    }
+
+    await ctx.db.delete(args.articleId);
+    return null;
+  },
+});
+

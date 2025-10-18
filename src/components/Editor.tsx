@@ -17,9 +17,10 @@ import { useEffect, useRef } from "react";
 interface EditorProps {
   content: string;
   onUpdate: (content: string) => void;
+  editorRef?: React.MutableRefObject<ReturnType<typeof useEditor> | null>;
 }
 
-export function Editor({ content, onUpdate }: EditorProps) {
+export function Editor({ content, onUpdate, editorRef }: EditorProps) {
   const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const periodicSaveRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -46,6 +47,13 @@ export function Editor({ content, onUpdate }: EditorProps) {
       }, 1000);
     },
   });
+
+  // Expose editor instance to parent via ref
+  useEffect(() => {
+    if (editorRef) {
+      editorRef.current = editor;
+    }
+  }, [editor, editorRef]);
 
   // Periodic save every 30 seconds
   useEffect(() => {
