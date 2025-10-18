@@ -3,7 +3,7 @@ import "./globals.css";
 import { ConvexClientProvider } from "@/providers/ConvexClientProvider";
 
 export const metadata: Metadata = {
-  title: "Omori",
+  title: "omori",
   description: "A minimalistic article editor",
 };
 

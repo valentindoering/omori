@@ -6,7 +6,7 @@ import { usePaginatedQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
-import { Plus } from "lucide-react";
+import { Plus, ChevronLeft } from "lucide-react";
 
 /**
  * Main articles list page.
@@ -48,9 +48,9 @@ function ArticlesList() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="border-b border-gray-800">
+      <div>
         <div className="max-w-6xl mx-auto px-8 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Omori</h1>
+          <h1 className="text-2xl font-bold">omori</h1>
           <UserMenu />
         </div>
       </div>
@@ -58,13 +58,12 @@ function ArticlesList() {
       {/* Main content */}
       <div className="max-w-6xl mx-auto px-8 py-8">
         {/* Create button */}
-        <div className="flex justify-end mb-6">
+        <div className="flex justify-end mb-2">
           <button
             onClick={handleCreateArticle}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+            className="flex items-center gap-2 p-2 hover:bg-hover rounded-full transition-colors"
           >
-            <Plus size={20} />
-            <span>New Article</span>
+            <Plus size={16} />
           </button>
         </div>
 
@@ -83,14 +82,16 @@ function ArticlesList() {
                 <button
                   key={article._id}
                   onClick={() => router.push(`/article/${article._id}`)}
-                  className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-900 rounded-lg transition-colors text-left"
+                  className="w-full flex items-center justify-between cursor-pointer px-4 py-0.5 hover:bg-hover rounded-3xl transition-colors text-left"
                 >
-                  <span className="text-lg">{article.title}</span>
+                  <span className="text-base">{article.title}</span>
                   <span className="text-sm text-gray-500">
                     {new Date(article._creationTime).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
                     })}
                   </span>
                 </button>

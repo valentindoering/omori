@@ -5,7 +5,7 @@ import { Editor } from "@/components/Editor";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useEffect, useRef, useState } from "react";
 
@@ -80,14 +80,13 @@ function ArticleEditor() {
   return (
     <div className="min-h-screen">
       {/* Header with back button */}
-      <div className="border-b border-gray-800">
+      <div>
         <div className="max-w-4xl mx-auto px-8 py-4">
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-white transition-colors"
           >
-            <ArrowLeft size={20} />
-            <span>Back</span>
+            <ChevronLeft size={24} />
           </button>
         </div>
       </div>
@@ -109,6 +108,8 @@ function ArticleEditor() {
               year: "numeric",
               month: "long",
               day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
             })}
           </div>
         </div>
