@@ -215,6 +215,11 @@ function ArticlesList() {
                     </span>
                     <span className="text-base truncate min-w-0 flex-1">{article.title}</span>
                     <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0 flex items-center gap-3">
+                      {isEmbedSearchOpen && debouncedEmbedSearch && "_score" in article && (
+                        <span className="text-xs font-mono text-gray-400">
+                          {(article._score * 100).toFixed(1)}%
+                        </span>
+                      )}
                       <span className="hidden sm:inline">
                         {new Date(displayDate).toLocaleDateString("en-US", {
                           year: "2-digit",
