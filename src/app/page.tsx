@@ -5,7 +5,8 @@ import { UserMenu } from "@/components/UserMenu";
 import { usePaginatedQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import Image from "next/image";
 
 export default function Home() {
@@ -64,32 +65,41 @@ function ArticlesList() {
             </div>
           ) : (
             <div className="space-y-1">
-              {results.map((article) => (
-                <button
-                  key={article._id}
-                  onClick={() => router.push(`/article/${article._id}`)}
-                  className="w-full flex items-center gap-4 px-4 py-0.5 hover:bg-hover cursor-pointer rounded-3xl transition-colors text-left"
-                >
-                  <span className="text-base truncate min-w-0 flex-1">{article.title}</span>
-                  <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0">
-                    <span className="hidden sm:inline">
-                      {new Date(article._creationTime).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "numeric",
-                        minute: "2-digit",
-                      })}
+              {results.map((article) => {
+                const IconComponent = article.icon 
+                  ? ((LucideIcons as any)[article.icon] || FileText)
+                  : FileText;
+                
+                return (
+                  <button
+                    key={article._id}
+                    onClick={() => router.push(`/article/${article._id}`)}
+                    className="w-full flex items-center gap-3 px-4 py-0.5 hover:bg-hover cursor-pointer rounded-3xl transition-colors text-left"
+                  >
+                    <span className="flex-shrink-0 text-gray-400">
+                      <IconComponent size={20} />
                     </span>
-                    <span className="sm:hidden">
-                      {new Date(article._creationTime).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
+                    <span className="text-base truncate min-w-0 flex-1">{article.title}</span>
+                    <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0">
+                      <span className="hidden sm:inline">
+                        {new Date(article._creationTime).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      <span className="sm:hidden">
+                        {new Date(article._creationTime).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
                     </span>
-                  </span>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
               
               {status === "LoadingMore" && (
                 <div className="text-center py-4 text-gray-500">Loading more...</div>

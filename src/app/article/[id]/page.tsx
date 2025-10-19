@@ -3,6 +3,7 @@
 import { AuthWrapper } from "@/components/AuthWrapper";
 import { Editor } from "@/components/Editor";
 import { DeleteArticleDialog } from "@/components/DeleteArticleDialog";
+import { IconPicker } from "@/components/IconPicker";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useRouter, useParams } from "next/navigation";
@@ -29,6 +30,7 @@ function ArticleEditor() {
   const article = useQuery(api.articles.getArticle, { articleId });
   const updateTitle = useMutation(api.articles.updateTitle);
   const updateContent = useMutation(api.articles.updateContent);
+  const updateIcon = useMutation(api.articles.updateIcon);
   const deleteArticle = useMutation(api.articles.deleteArticle);
 
   const [title, setTitle] = useState("");
@@ -100,6 +102,10 @@ function ArticleEditor() {
     }
   };
 
+  const handleIconChange = async (iconName: string) => {
+    await updateIcon({ articleId, icon: iconName });
+  };
+
   if (!article) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -147,6 +153,9 @@ function ArticleEditor() {
 
       <div className="max-w-4xl mx-auto">
         <div className="px-8 py-4 space-y-1">
+          <div className="mb-2">
+            <IconPicker currentIcon={article.icon} onSelect={handleIconChange} />
+          </div>
           <textarea
             ref={titleInputRef}
             value={title}

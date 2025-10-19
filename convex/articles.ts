@@ -43,6 +43,7 @@ export const listArticles = query({
         _creationTime: v.number(),
         title: v.string(),
         userId: v.id("users"),
+        icon: v.optional(v.string()),
       })
     ),
     isDone: v.boolean(),
@@ -67,6 +68,7 @@ export const listArticles = query({
         _creationTime: article._creationTime,
         title: article.title,
         userId: article.userId,
+        icon: article.icon,
       })),
       isDone: result.isDone,
       continueCursor: result.continueCursor,
@@ -87,6 +89,7 @@ export const getArticle = query({
       title: v.string(),
       content: v.string(),
       userId: v.id("users"),
+      icon: v.optional(v.string()),
     }),
     v.null()
   ),
@@ -162,6 +165,36 @@ export const updateContent = mutation({
 
     await ctx.db.patch(args.articleId, {
       content: args.content,
+    });
+
+    return null;
+  },
+});
+
+/**
+ * Update an article's icon.
+ */
+export const updateIcon = mutation({
+  args: {
+    articleId: v.id("articles"),
+    icon: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not authenticated");
+    }
+
+    const article = await ctx.db.get(args.articleId);
+    
+    // Only allow updating if article belongs to current user
+    if (!article || article.userId !== userId) {
+      throw new Error("Article not found or unauthorized");
+    }
+
+    await ctx.db.patch(args.articleId, {
+      icon: args.icon,
     });
 
     return null;

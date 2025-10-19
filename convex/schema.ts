@@ -19,6 +19,7 @@ export default defineSchema({
     title: v.string(),
     content: v.string(), // Stored as JSON string from TipTap
     userId: v.id("users"), // Reference to the authenticated user in the users table
+    icon: v.optional(v.string()), // Custom icon for the article (emoji), defaults to 📄
   })
     // Index by userId (Convex automatically adds _creationTime to all indexes)
     .index("by_user", ["userId"]),
