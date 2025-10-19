@@ -64,7 +64,7 @@ export function IconPicker({ currentIcon, onSelect }: IconPickerProps) {
   const displayIconName = currentIcon || DEFAULT_ICON;
   
   // Get the icon component dynamically
-  const DisplayIcon = (LucideIcons as any)[displayIconName] || LucideIcons.FileText;
+  const DisplayIcon = (LucideIcons as Record<string, unknown>)[displayIconName] as typeof LucideIcons.FileText || LucideIcons.FileText;
 
   return (
     <Popover className="relative">
@@ -98,7 +98,7 @@ export function IconPicker({ currentIcon, onSelect }: IconPickerProps) {
           {/* Icon grid */}
           <div className="grid grid-cols-6 gap-2 max-h-80 overflow-y-auto pr-2 scrollbar-thin">
             {ICON_CATEGORIES[selectedCategory].map((iconName) => {
-              const IconComponent = (LucideIcons as any)[iconName];
+              const IconComponent = (LucideIcons as Record<string, unknown>)[iconName] as typeof LucideIcons.FileText;
               if (!IconComponent) return null;
               
               return (

@@ -6,7 +6,7 @@ import { api } from "../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 import { ChevronLeft, Upload, FileText, CheckCircle, AlertCircle } from "lucide-react";
-import { generateHTML, generateJSON } from "@tiptap/html";
+import { generateJSON } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 
 interface ParsedArticle {
@@ -62,7 +62,7 @@ function ImportContent() {
     
     // Find the CSV file for metadata
     const csvFile = fileArray.find(f => f.name.endsWith('.csv'));
-    let metadata: Map<string, { created: number }> = new Map();
+    const metadata: Map<string, { created: number }> = new Map();
     
     if (csvFile) {
       const csvText = await csvFile.text();
@@ -276,7 +276,7 @@ function ImportContent() {
             type="file"
             id="file-upload"
             multiple
-            {...({ webkitdirectory: "", directory: "" } as any)}
+            {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
             onChange={handleFileInput}
             className="hidden"
             disabled={isProcessing}
@@ -331,11 +331,11 @@ function ImportContent() {
           </h2>
           <ol className="space-y-2 text-sm text-gray-300 list-decimal list-inside">
             <li>Open your Notion database</li>
-            <li>Click the "..." menu in the top right</li>
-            <li>Select "Export"</li>
-            <li>Choose "HTML" as the export format</li>
-            <li>Make sure to check "Include subpages"</li>
-            <li>Click "Export" and wait for the download</li>
+            <li>Click the &quot;...&quot; menu in the top right</li>
+            <li>Select &quot;Export&quot;</li>
+            <li>Choose &quot;HTML&quot; as the export format</li>
+            <li>Make sure to check &quot;Include subpages&quot;</li>
+            <li>Click &quot;Export&quot; and wait for the download</li>
             <li>Unzip the downloaded file</li>
             <li>Drag the entire unzipped folder here (or click to select it)</li>
           </ol>

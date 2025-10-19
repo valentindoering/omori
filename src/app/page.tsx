@@ -67,7 +67,7 @@ function ArticlesList() {
             <div className="space-y-1">
               {results.map((article) => {
                 const IconComponent = article.icon 
-                  ? ((LucideIcons as any)[article.icon] || FileText)
+                  ? ((LucideIcons as Record<string, unknown>)[article.icon] as typeof FileText || FileText)
                   : FileText;
                 
                 // Use createdAt for display
