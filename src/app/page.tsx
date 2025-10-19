@@ -2,7 +2,7 @@
 
 import { AuthWrapper } from "@/components/AuthWrapper";
 import { UserMenu } from "@/components/UserMenu";
-import { usePaginatedQuery, useMutation } from "convex/react";
+import { usePaginatedQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Plus, FileText, Search, SearchCheck, Loader2 } from "lucide-react";
@@ -22,16 +22,19 @@ export default function Home() {
 function ArticlesList() {
   const router = useRouter();
   const createArticle = useMutation(api.articles.createArticle);
+  const searchByEmbedding = useAction((api.embeddings as any).searchByEmbedding);
 
   // Title search state
   const [titleSearchQuery, setTitleSearchQuery] = useState("");
   const [debouncedTitleSearch, setDebouncedTitleSearch] = useState("");
   const [isTitleSearchOpen, setIsTitleSearchOpen] = useState(false);
 
-  // Embedding search state (cloned behavior for now)
+  // Embedding search state
   const [embedSearchQuery, setEmbedSearchQuery] = useState("");
   const [debouncedEmbedSearch, setDebouncedEmbedSearch] = useState("");
   const [isEmbedSearchOpen, setIsEmbedSearchOpen] = useState(false);
+  const [embedResults, setEmbedResults] = useState<any[]>([]);
+  const [embedLoading, setEmbedLoading] = useState(false);
 
   // Input focus handled in SearchControl
 
@@ -45,17 +48,36 @@ function ArticlesList() {
     return () => clearTimeout(id);
   }, [embedSearchQuery]);
 
-  const usedDebouncedSearch = isTitleSearchOpen
-    ? debouncedTitleSearch
-    : isEmbedSearchOpen
-      ? debouncedEmbedSearch
-      : "";
+  // Trigger embedding search when debounced query changes (only when there's a query)
+  useEffect(() => {
+    if (isEmbedSearchOpen && debouncedEmbedSearch) {
+      setEmbedLoading(true);
+      searchByEmbedding({ query: debouncedEmbedSearch })
+        .then((res) => {
+          setEmbedResults(res);
+          setEmbedLoading(false);
+        })
+        .catch(() => {
+          setEmbedResults([]);
+          setEmbedLoading(false);
+        });
+    }
+  }, [debouncedEmbedSearch, isEmbedSearchOpen, searchByEmbedding]);
 
-  const { results, status, loadMore } = usePaginatedQuery(
+  // Always load articles via paginated query (for default view and title search)
+  const { results: allArticles, status: articlesStatus, loadMore } = usePaginatedQuery(
     api.articles.listArticles,
-    { search: usedDebouncedSearch || undefined },
+    { search: isTitleSearchOpen && debouncedTitleSearch ? debouncedTitleSearch : undefined },
     { initialNumItems: 20 }
   );
+
+  // Determine which results to show
+  // - If embed search is open AND has a query, show embed results
+  // - Otherwise, show paginated articles (default or title search)
+  const results = (isEmbedSearchOpen && debouncedEmbedSearch) ? embedResults : allArticles;
+  const status = (isEmbedSearchOpen && debouncedEmbedSearch)
+    ? (embedLoading ? "LoadingFirstPage" : "CanLoadMore") 
+    : articlesStatus;
 
   const handleCreateArticle = async () => {
     const articleId = await createArticle();
@@ -103,12 +125,12 @@ function ArticlesList() {
                 setIsTitleSearchOpen(false);
               }}
               placeholder="Title search"
-              showSpinner={status === "LoadingFirstPage" && isTitleSearchOpen && usedDebouncedSearch !== ""}
+              showSpinner={status === "LoadingFirstPage" && isTitleSearchOpen && debouncedTitleSearch !== ""}
               idleIcon={<Search size={16} />}
               ariaLabel="Toggle search"
             />
 
-            {/* Embedding search clone (UI only for now) */}
+            {/* Embedding search */}
             <SearchControl
               isOpen={isEmbedSearchOpen}
               onToggle={() => {
@@ -128,9 +150,10 @@ function ArticlesList() {
                 setEmbedSearchQuery("");
                 setDebouncedEmbedSearch("");
                 setIsEmbedSearchOpen(false);
+                setEmbedResults([]);
               }}
               placeholder="Embedding search"
-              showSpinner={status === "LoadingFirstPage" && isEmbedSearchOpen && usedDebouncedSearch !== ""}
+              showSpinner={embedLoading && isEmbedSearchOpen && debouncedEmbedSearch !== ""}
               idleIcon={<SearchCheck size={16} />}
               ariaLabel="Toggle embedding search"
             />
@@ -149,7 +172,7 @@ function ArticlesList() {
           {results.length === 0 ? (
             status === "LoadingFirstPage" ? (
               null
-            ) : usedDebouncedSearch ? (
+            ) : (isTitleSearchOpen && debouncedTitleSearch) || (isEmbedSearchOpen && debouncedEmbedSearch) ? (
               <div className="text-center py-16 text-gray-500">
                 <p>No matching articles.</p>
               </div>

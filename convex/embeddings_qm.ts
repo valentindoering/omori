@@ -36,4 +36,38 @@ export const setEmbedding = internalMutation({
   },
 });
 
+export const fetchArticlesByIds = internalQuery({
+  args: {
+    ids: v.array(v.id("articles")),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("articles"),
+      _creationTime: v.number(),
+      createdAt: v.number(),
+      title: v.string(),
+      userId: v.id("users"),
+      icon: v.optional(v.string()),
+      hasEmbedding: v.boolean(),
+    })
+  ),
+  handler: async (ctx, args) => {
+    const articles = await Promise.all(
+      args.ids.map((id) => ctx.db.get(id))
+    );
+
+    return articles
+      .filter((article): article is NonNullable<typeof article> => article !== null)
+      .map((article) => ({
+        _id: article._id,
+        _creationTime: article._creationTime,
+        createdAt: article.createdAt,
+        title: article.title,
+        userId: article.userId,
+        icon: article.icon,
+        hasEmbedding: article.embedding !== undefined,
+      }));
+  },
+});
+
 

@@ -31,6 +31,12 @@ export default defineSchema({
     .searchIndex("search_title_by_user", {
       searchField: "title",
       filterFields: ["userId"],
+    })
+    // Vector index for semantic/embedding search
+    .vectorIndex("by_embedding", {
+      vectorField: "embedding",
+      dimensions: 768,
+      filterFields: ["userId"],
     }),
 });
 
