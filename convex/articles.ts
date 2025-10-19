@@ -3,8 +3,47 @@ import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
 
+// All available icons from the icon picker
+const ALL_ICONS = [
+  // Nature
+  "Flower", "Flower2", "Trees", "TreePine", "Sprout", "Leaf",
+  "Sun", "Moon", "CloudRain", "Cloud", "CloudSnow", "Snowflake",
+  "Waves", "Mountain", "Flame", "Sparkles", "Wind", "Rainbow",
+  // Emotions & Love
+  "Heart", "HeartHandshake", "HeartCrack", "Smile", "Frown", "Meh",
+  "Laugh", "Angry", "PartyPopper", "Ghost", "Skull", "Eye",
+  "ThumbsUp", "Peace", "Handshake", "MessageHeart", "SmilePlus", "Annoyed",
+  // Creative & Art
+  "Palette", "Brush", "Pen", "PenTool", "Feather", "Sparkle",
+  "Wand", "Wand2", "Music", "Music2", "Guitar", "Headphones",
+  "Camera", "Film", "Image", "Drama", "Mic", "BookOpen",
+  // Mystical & Magic
+  "Star", "Stars", "Sparkles", "Zap", "Crown", "Gem",
+  "Diamond", "Circle", "Moon", "Sun", "Eclipse", "Orbit",
+  "Atom", "Infinity", "Eye", "Ghost", "Skull", "Trophy",
+  // Food & Drinks
+  "Coffee", "Wine", "Beer", "Pizza", "Cake", "IceCream",
+  "Apple", "Cherry", "Citrus", "Candy", "Cookie", "Soup",
+  "Utensils", "UtensilsCrossed", "Martini", "Milk", "Flame", "Egg",
+  // Travel & Places
+  "Plane", "Ship", "Car", "Train", "Sailboat", "Anchor",
+  "MapPin", "Map", "Compass", "Globe", "Home", "Hotel",
+  "Building", "Church", "Castle", "Mountain", "Palmtree", "Island",
+  // Animals
+  "Bird", "Bug", "Cat", "Dog", "Fish", "Rabbit",
+  "Squirrel", "Turtle", "Snail", "Beef", "Rat", "Egg",
+  // Time & Seasons
+  "Calendar", "CalendarDays", "Clock", "Timer", "Hourglass", "Sunrise",
+  "Sunset", "SunMoon", "CloudSun", "CloudMoon", "Snowflake", "Sprout",
+  "Leaf", "Flower", "Sun", "Moon", "Clock3", "Watch",
+  // Objects & Symbols
+  "Book", "BookMarked", "Bookmark", "Key", "Lock", "Gift",
+  "Package", "Flag", "Bell", "Anchor", "Umbrella", "Glasses",
+  "Watch", "Shirt", "Footprints", "Badge", "Shield", "Bike",
+];
+
 /**
- * Create a new article with default "Untitled" title.
+ * Create a new article with default "Untitled" title and a random icon.
  * Returns the ID of the newly created article.
  */
 export const createArticle = mutation({
@@ -16,6 +55,9 @@ export const createArticle = mutation({
       throw new Error("Not authenticated");
     }
 
+    // Select a random icon
+    const randomIcon = ALL_ICONS[Math.floor(Math.random() * ALL_ICONS.length)];
+
     // Create article with empty content (TipTap will initialize it)
     const articleId = await ctx.db.insert("articles", {
       title: "Untitled",
@@ -24,6 +66,7 @@ export const createArticle = mutation({
         content: [{ type: "paragraph" }],
       }),
       userId,
+      icon: randomIcon,
     });
 
     return articleId;

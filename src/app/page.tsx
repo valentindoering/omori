@@ -83,7 +83,7 @@ function ArticlesList() {
                     <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0">
                       <span className="hidden sm:inline">
                         {new Date(article._creationTime).toLocaleDateString("en-US", {
-                          year: "numeric",
+                          year: "2-digit",
                           month: "short",
                           day: "numeric",
                           hour: "numeric",
