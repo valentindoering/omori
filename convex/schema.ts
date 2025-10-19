@@ -25,6 +25,11 @@ export default defineSchema({
   })
     // Index by userId (Convex automatically adds _creationTime to all indexes)
     .index("by_user", ["userId"])
-    .index("by_user_and_createdAt", ["userId", "createdAt"]),
+    .index("by_user_and_createdAt", ["userId", "createdAt"]) 
+    // Search index for title scoped by user for efficient server-side search
+    .searchIndex("search_title_by_user", {
+      searchField: "title",
+      filterFields: ["userId"],
+    }),
 });
 

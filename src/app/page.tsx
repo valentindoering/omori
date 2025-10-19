@@ -5,9 +5,10 @@ import { UserMenu } from "@/components/UserMenu";
 import { usePaginatedQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useRouter } from "next/navigation";
-import { Plus, FileText } from "lucide-react";
+import { Plus, FileText, Search, X, Loader2 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
   return (
@@ -20,10 +21,27 @@ export default function Home() {
 function ArticlesList() {
   const router = useRouter();
   const createArticle = useMutation(api.articles.createArticle);
-  
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isSearchOpen) {
+      // Focus the input when it opens for quick typing
+      searchInputRef.current?.focus();
+    }
+  }, [isSearchOpen]);
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 250);
+    return () => clearTimeout(id);
+  }, [searchQuery]);
+
   const { results, status, loadMore } = usePaginatedQuery(
     api.articles.listArticles,
-    {},
+    { search: debouncedSearch || undefined },
     { initialNumItems: 20 }
   );
 
@@ -49,20 +67,71 @@ function ArticlesList() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-8 py-2">
-        <div className="flex justify-end mb-2">
-          <button
-            onClick={handleCreateArticle}
-            className="flex items-center gap-2 p-2 hover:bg-hover rounded-full transition-colors"
-          >
-            <Plus size={16} />
-          </button>
+        <div className="flex items-center justify-end mb-2">
+          {/* Controls cluster: search button, expanding input, plus button */}
+          <div className="flex items-center">
+            <button
+              onClick={() => setIsSearchOpen((v) => !v)}
+              className="flex items-center gap-2 p-2 hover:bg-hover rounded-full transition-colors"
+              aria-label="Toggle search"
+            >
+              {status === "LoadingFirstPage" && debouncedSearch ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Search size={16} />
+              )}
+            </button>
+
+            <div
+              className={`overflow-hidden transition-all duration-200 flex items-center h-8 ${
+                isSearchOpen ? "w-64 mx-2" : "w-0 mx-0"
+              }`}
+            >
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search"
+                className="w-full h-8 bg-transparent text-sm text-white placeholder-gray-500 px-2 py-0 outline-none focus:outline-none focus:ring-0"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setIsSearchOpen(false);
+                  }}
+                  className="ml-1 p-1 hover:bg-hover rounded-full transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={handleCreateArticle}
+              className="flex items-center gap-2 p-2 hover:bg-hover rounded-full transition-colors"
+              aria-label="Create article"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
         </div>
 
         <div onScroll={handleScroll} className="max-h-[calc(100vh-180px)] overflow-y-auto">
           {results.length === 0 ? (
-            <div className="text-center py-16 text-gray-500">
-              <p>No articles yet. Create your first one!</p>
-            </div>
+            status === "LoadingFirstPage" ? (
+              null
+            ) : debouncedSearch ? (
+              <div className="text-center py-16 text-gray-500">
+                <p>No matching articles.</p>
+              </div>
+            ) : (
+              <div className="text-center py-16 text-gray-500">
+                <p>No articles yet. Create your first one!</p>
+              </div>
+            )
           ) : (
             <div className="space-y-1">
               {results.map((article) => {

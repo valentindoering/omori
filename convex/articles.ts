@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
+import { Doc } from "./_generated/dataModel";
 
 // All available icons from the icon picker
 const ALL_ICONS = [
@@ -79,7 +80,10 @@ export const createArticle = mutation({
  * Returns articles sorted by createdAt (newest first).
  */
 export const listArticles = query({
-  args: { paginationOpts: paginationOptsValidator },
+  args: { 
+    paginationOpts: paginationOptsValidator,
+    search: v.optional(v.string()),
+  },
   returns: v.object({
     page: v.array(
       v.object({
@@ -100,15 +104,27 @@ export const listArticles = query({
       throw new Error("Not authenticated");
     }
 
-    // Query articles by user, ordered by createdAt (newest first)
-    const result = await ctx.db
-      .query("articles")
-      .withIndex("by_user_and_createdAt", (q) => q.eq("userId", userId))
-      .order("desc")
-      .paginate(args.paginationOpts);
+    const search = (args.search ?? "").trim();
+    let result;
+    if (search.length > 0) {
+      // Use search index on title, filtered by user, newest first by createdAt
+      result = await ctx.db
+        .query("articles")
+        .withSearchIndex("search_title_by_user", (q) =>
+          q.search("title", search).eq("userId", userId)
+        )
+        .paginate(args.paginationOpts);
+    } else {
+      // Default listing by user, newest first
+      result = await ctx.db
+        .query("articles")
+        .withIndex("by_user_and_createdAt", (q) => q.eq("userId", userId))
+        .order("desc")
+        .paginate(args.paginationOpts);
+    }
 
     return {
-      page: result.page.map((article) => ({
+      page: result.page.map((article: Doc<"articles">) => ({
         _id: article._id,
         _creationTime: article._creationTime,
         createdAt: article.createdAt,
