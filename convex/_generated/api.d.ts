@@ -10,6 +10,8 @@
 
 import type * as articles from "../articles.js";
 import type * as auth from "../auth.js";
+import type * as embeddings from "../embeddings.js";
+import type * as embeddings_qm from "../embeddings_qm.js";
 import type * as http from "../http.js";
 import type * as users from "../users.js";
 
@@ -30,6 +32,8 @@ import type {
 declare const fullApi: ApiFromModules<{
   articles: typeof articles;
   auth: typeof auth;
+  embeddings: typeof embeddings;
+  embeddings_qm: typeof embeddings_qm;
   http: typeof http;
   users: typeof users;
 }>;

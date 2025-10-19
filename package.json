@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@convex-dev/auth": "^0.0.90",
+    "@google/genai": "^1.25.0",
     "@headlessui/react": "^2.2.9",
     "@tiptap/html": "^3.7.2",
     "@tiptap/pm": "^3.7.2",

@@ -22,6 +22,7 @@ export default defineSchema({
     icon: v.optional(v.string()), // Custom icon for the article
     createdAt: v.number(), // Creation time - set to current time for new articles, or original Notion time for imports
     originalHtml: v.optional(v.string()), // Original HTML from Notion import (preserved for reference)
+    embedding: v.optional(v.array(v.number())), // Article embedding vector (e.g., 768 dims)
   })
     // Index by userId (Convex automatically adds _creationTime to all indexes)
     .index("by_user", ["userId"])

@@ -93,6 +93,7 @@ export const listArticles = query({
         title: v.string(),
         userId: v.id("users"),
         icon: v.optional(v.string()),
+        hasEmbedding: v.boolean(),
       })
     ),
     isDone: v.boolean(),
@@ -131,6 +132,8 @@ export const listArticles = query({
         title: article.title,
         userId: article.userId,
         icon: article.icon,
+        // presence-only indicator
+        hasEmbedding: article.embedding !== undefined,
       })),
       isDone: result.isDone,
       continueCursor: result.continueCursor,
@@ -153,7 +156,6 @@ export const getArticle = query({
       content: v.string(),
       userId: v.id("users"),
       icon: v.optional(v.string()),
-      originalHtml: v.optional(v.string()),
     }),
     v.null()
   ),
@@ -170,7 +172,16 @@ export const getArticle = query({
       return null;
     }
 
-    return article;
+    // Return article without embedding (not needed for display/editing)
+    return {
+      _id: article._id,
+      _creationTime: article._creationTime,
+      createdAt: article.createdAt,
+      title: article.title,
+      content: article.content,
+      userId: article.userId,
+      icon: article.icon,
+    };
   },
 });
 

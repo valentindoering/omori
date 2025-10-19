@@ -178,7 +178,7 @@ function ArticlesList() {
                       <IconComponent size={20} />
                     </span>
                     <span className="text-base truncate min-w-0 flex-1">{article.title}</span>
-                    <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0">
+                    <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0 flex items-center gap-3">
                       <span className="hidden sm:inline">
                         {new Date(displayDate).toLocaleDateString("en-US", {
                           year: "2-digit",
@@ -194,6 +194,12 @@ function ArticlesList() {
                           day: "numeric",
                         })}
                       </span>
+                      <span
+                        className={`inline-block w-1.5 h-1.5 rounded-full ${
+                          article.hasEmbedding ? "bg-gray-400" : "bg-gray-700"
+                        }`}
+                        title={article.hasEmbedding ? "Embedding ready" : "No embedding yet"}
+                      />
                     </span>
                   </button>
                 );
