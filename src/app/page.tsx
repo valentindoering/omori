@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Plus, FileText, Search, SearchCheck } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { SearchControl } from "@/components/SearchControl";
 
 type SearchResult = {
@@ -22,6 +22,113 @@ type SearchResult = {
   hasEmbedding: boolean;
   _score: number;
 };
+
+type SearchMode = "idle" | "title" | "embed";
+
+type SearchState = {
+  mode: SearchMode;
+  titleQuery: string;
+  debouncedTitleQuery: string;
+  embedQuery: string;
+  debouncedEmbedQuery: string;
+  embedResults: SearchResult[];
+  embedLoading: boolean;
+};
+
+type SearchAction =
+  | { type: "TOGGLE_TITLE" }
+  | { type: "TOGGLE_EMBED" }
+  | { type: "UPDATE_TITLE_QUERY"; query: string }
+  | { type: "UPDATE_EMBED_QUERY"; query: string }
+  | { type: "SET_DEBOUNCED_TITLE"; query: string }
+  | { type: "SET_DEBOUNCED_EMBED"; query: string }
+  | { type: "CLEAR_TITLE" }
+  | { type: "CLEAR_EMBED" }
+  | { type: "EMBED_LOADING" }
+  | { type: "EMBED_SUCCESS"; results: SearchResult[] }
+  | { type: "EMBED_ERROR" };
+
+const initialSearchState: SearchState = {
+  mode: "idle",
+  titleQuery: "",
+  debouncedTitleQuery: "",
+  embedQuery: "",
+  debouncedEmbedQuery: "",
+  embedResults: [],
+  embedLoading: false,
+};
+
+function searchReducer(state: SearchState, action: SearchAction): SearchState {
+  switch (action.type) {
+    case "TOGGLE_TITLE":
+      if (state.mode === "title") {
+        return initialSearchState;
+      }
+      return {
+        ...initialSearchState,
+        mode: "title",
+      };
+
+    case "TOGGLE_EMBED":
+      if (state.mode === "embed") {
+        return initialSearchState;
+      }
+      return {
+        ...initialSearchState,
+        mode: "embed",
+      };
+
+    case "UPDATE_TITLE_QUERY":
+      return { ...state, titleQuery: action.query };
+
+    case "UPDATE_EMBED_QUERY":
+      return { ...state, embedQuery: action.query };
+
+    case "SET_DEBOUNCED_TITLE":
+      return { ...state, debouncedTitleQuery: action.query };
+
+    case "SET_DEBOUNCED_EMBED":
+      return { ...state, debouncedEmbedQuery: action.query };
+
+    case "CLEAR_TITLE":
+      return {
+        ...state,
+        mode: "idle",
+        titleQuery: "",
+        debouncedTitleQuery: "",
+      };
+
+    case "CLEAR_EMBED":
+      return {
+        ...state,
+        mode: "idle",
+        embedQuery: "",
+        debouncedEmbedQuery: "",
+        embedResults: [],
+        embedLoading: false,
+      };
+
+    case "EMBED_LOADING":
+      return { ...state, embedLoading: true };
+
+    case "EMBED_SUCCESS":
+      return {
+        ...state,
+        embedResults: action.results,
+        embedLoading: false,
+      };
+
+    case "EMBED_ERROR":
+      return {
+        ...state,
+        embedResults: [],
+        embedLoading: false,
+      };
+
+    default:
+      return state;
+  }
+}
 
 export default function Home() {
   return (
@@ -37,59 +144,49 @@ function ArticlesList() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchByEmbedding = useAction((api.embeddings as any).searchByEmbedding);
 
-  // Title search state
-  const [titleSearchQuery, setTitleSearchQuery] = useState("");
-  const [debouncedTitleSearch, setDebouncedTitleSearch] = useState("");
-  const [isTitleSearchOpen, setIsTitleSearchOpen] = useState(false);
+  const [state, dispatch] = useReducer(searchReducer, initialSearchState);
 
-  // Embedding search state
-  const [embedSearchQuery, setEmbedSearchQuery] = useState("");
-  const [debouncedEmbedSearch, setDebouncedEmbedSearch] = useState("");
-  const [isEmbedSearchOpen, setIsEmbedSearchOpen] = useState(false);
-  const [embedResults, setEmbedResults] = useState<SearchResult[]>([]);
-  const [embedLoading, setEmbedLoading] = useState(false);
-
-  // Input focus handled in SearchControl
-
+  // Debounce title query
   useEffect(() => {
-    const id = setTimeout(() => setDebouncedTitleSearch(titleSearchQuery.trim()), 250);
+    const id = setTimeout(
+      () => dispatch({ type: "SET_DEBOUNCED_TITLE", query: state.titleQuery.trim() }),
+      250
+    );
     return () => clearTimeout(id);
-  }, [titleSearchQuery]);
+  }, [state.titleQuery]);
 
+  // Debounce embed query
   useEffect(() => {
-    const id = setTimeout(() => setDebouncedEmbedSearch(embedSearchQuery.trim()), 250);
+    const id = setTimeout(
+      () => dispatch({ type: "SET_DEBOUNCED_EMBED", query: state.embedQuery.trim() }),
+      250
+    );
     return () => clearTimeout(id);
-  }, [embedSearchQuery]);
+  }, [state.embedQuery]);
 
-  // Trigger embedding search when debounced query changes (only when there's a query)
+  // Trigger embedding search when debounced query changes
   useEffect(() => {
-    if (isEmbedSearchOpen && debouncedEmbedSearch) {
-      setEmbedLoading(true);
-      searchByEmbedding({ query: debouncedEmbedSearch })
-        .then((res) => {
-          setEmbedResults(res);
-          setEmbedLoading(false);
-        })
-        .catch(() => {
-          setEmbedResults([]);
-          setEmbedLoading(false);
-        });
+    if (state.mode === "embed" && state.debouncedEmbedQuery) {
+      dispatch({ type: "EMBED_LOADING" });
+      searchByEmbedding({ query: state.debouncedEmbedQuery })
+        .then((res) => dispatch({ type: "EMBED_SUCCESS", results: res }))
+        .catch(() => dispatch({ type: "EMBED_ERROR" }));
     }
-  }, [debouncedEmbedSearch, isEmbedSearchOpen, searchByEmbedding]);
+  }, [state.debouncedEmbedQuery, state.mode, searchByEmbedding]);
 
   // Always load articles via paginated query (for default view and title search)
   const { results: allArticles, status: articlesStatus, loadMore } = usePaginatedQuery(
     api.articles.listArticles,
-    { search: isTitleSearchOpen && debouncedTitleSearch ? debouncedTitleSearch : undefined },
+    { search: state.mode === "title" && state.debouncedTitleQuery ? state.debouncedTitleQuery : undefined },
     { initialNumItems: 20 }
   );
 
   // Determine which results to show
-  // - If embed search is open AND has a query, show embed results
-  // - Otherwise, show paginated articles (default or title search)
-  const results = (isEmbedSearchOpen && debouncedEmbedSearch) ? embedResults : allArticles;
-  const status = (isEmbedSearchOpen && debouncedEmbedSearch)
-    ? (embedLoading ? "LoadingFirstPage" : "CanLoadMore") 
+  const results = state.mode === "embed" && state.debouncedEmbedQuery 
+    ? state.embedResults 
+    : allArticles;
+  const status = state.mode === "embed" && state.debouncedEmbedQuery
+    ? (state.embedLoading ? "LoadingFirstPage" : "CanLoadMore")
     : articlesStatus;
 
   const handleCreateArticle = async () => {
@@ -118,55 +215,26 @@ function ArticlesList() {
           {/* Controls cluster: title search, embed search, plus button */}
           <div className="flex items-center">
             <SearchControl
-              isOpen={isTitleSearchOpen}
-              onToggle={() => {
-                setIsTitleSearchOpen((prev) => {
-                  const next = !prev;
-                  if (next) {
-                    setIsEmbedSearchOpen(false);
-                    setEmbedSearchQuery("");
-                    setDebouncedEmbedSearch("");
-                  }
-                  return next;
-                });
-              }}
-              query={titleSearchQuery}
-              setQuery={setTitleSearchQuery}
-              onClear={() => {
-                setTitleSearchQuery("");
-                setDebouncedTitleSearch("");
-                setIsTitleSearchOpen(false);
-              }}
+              isOpen={state.mode === "title"}
+              onToggle={() => dispatch({ type: "TOGGLE_TITLE" })}
+              query={state.titleQuery}
+              setQuery={(query) => dispatch({ type: "UPDATE_TITLE_QUERY", query })}
+              onClear={() => dispatch({ type: "CLEAR_TITLE" })}
               placeholder="Title search"
-              showSpinner={status === "LoadingFirstPage" && isTitleSearchOpen && debouncedTitleSearch !== ""}
+              showSpinner={status === "LoadingFirstPage" && state.mode === "title" && state.debouncedTitleQuery !== ""}
               idleIcon={<Search size={16} />}
               ariaLabel="Toggle search"
             />
 
             {/* Embedding search */}
             <SearchControl
-              isOpen={isEmbedSearchOpen}
-              onToggle={() => {
-                setIsEmbedSearchOpen((prev) => {
-                  const next = !prev;
-                  if (next) {
-                    setIsTitleSearchOpen(false);
-                    setTitleSearchQuery("");
-                    setDebouncedTitleSearch("");
-                  }
-                  return next;
-                });
-              }}
-              query={embedSearchQuery}
-              setQuery={setEmbedSearchQuery}
-              onClear={() => {
-                setEmbedSearchQuery("");
-                setDebouncedEmbedSearch("");
-                setIsEmbedSearchOpen(false);
-                setEmbedResults([]);
-              }}
+              isOpen={state.mode === "embed"}
+              onToggle={() => dispatch({ type: "TOGGLE_EMBED" })}
+              query={state.embedQuery}
+              setQuery={(query) => dispatch({ type: "UPDATE_EMBED_QUERY", query })}
+              onClear={() => dispatch({ type: "CLEAR_EMBED" })}
               placeholder="Embedding search"
-              showSpinner={embedLoading && isEmbedSearchOpen && debouncedEmbedSearch !== ""}
+              showSpinner={state.embedLoading && state.mode === "embed" && state.debouncedEmbedQuery !== ""}
               idleIcon={<SearchCheck size={16} />}
               ariaLabel="Toggle embedding search"
             />
@@ -185,7 +253,7 @@ function ArticlesList() {
           {results.length === 0 ? (
             status === "LoadingFirstPage" ? (
               null
-            ) : (isTitleSearchOpen && debouncedTitleSearch) || (isEmbedSearchOpen && debouncedEmbedSearch) ? (
+            ) : state.mode !== "idle" && (state.debouncedTitleQuery || state.debouncedEmbedQuery) ? (
               <div className="text-center py-16 text-gray-500">
                 <p>No matching articles.</p>
               </div>
@@ -215,7 +283,7 @@ function ArticlesList() {
                     </span>
                     <span className="text-base truncate min-w-0 flex-1">{article.title}</span>
                     <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0 flex items-center gap-3">
-                      {isEmbedSearchOpen && debouncedEmbedSearch && "_score" in article && (
+                      {state.mode === "embed" && state.debouncedEmbedQuery && "_score" in article && (
                         <span className="text-xs font-mono text-gray-400">
                           {(article._score * 100).toFixed(1)}%
                         </span>
