@@ -2,13 +2,14 @@
 
 import { AuthWrapper } from "@/components/AuthWrapper";
 import { Editor } from "@/components/Editor";
+import { DeleteArticleDialog } from "@/components/DeleteArticleDialog";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useRouter, useParams } from "next/navigation";
 import { ChevronLeft, MoreVertical, Trash2 } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useEffect, useRef, useState } from "react";
-import { Menu, MenuButton, MenuItem, MenuItems, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
 export default function ArticlePage() {
   return (
@@ -156,33 +157,12 @@ function ArticleEditor() {
         />
       </div>
 
-      <Dialog open={showDeleteDialog} onClose={() => setShowDeleteDialog(false)} className="relative z-50">
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="bg-[#252525] rounded-lg p-6 max-w-sm border border-gray-700">
-            <DialogTitle className="text-lg font-semibold text-white mb-2">
-              Delete article
-            </DialogTitle>
-            <p className="text-sm text-gray-400 mb-6">
-              Are you sure you want to delete this article? This action cannot be undone.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowDeleteDialog(false)}
-                className="px-4 py-2 text-sm text-white hover:bg-hover rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 text-sm bg-red-500 text-white hover:bg-red-600 rounded-lg transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
+      <DeleteArticleDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        articleTitle={article.title !== "Untitled" ? `"${article.title}"` : "this article"}
+      />
     </div>
   );
 }
