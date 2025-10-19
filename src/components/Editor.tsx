@@ -11,8 +11,8 @@ interface EditorProps {
 }
 
 export function Editor({ content, onUpdate, editorRef }: EditorProps) {
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
-  const periodicSaveRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const periodicSaveRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -20,7 +20,7 @@ export function Editor({ content, onUpdate, editorRef }: EditorProps) {
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: "prose prose-invert max-w-none focus:outline-none min-h-[60vh] px-8 py-8",
+        class: "prose prose-invert max-w-none focus:outline-none min-h-[60vh] px-8",
       },
     },
     onUpdate: ({ editor }) => {

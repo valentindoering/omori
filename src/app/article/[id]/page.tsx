@@ -99,15 +99,19 @@ function ArticleEditor() {
         </button>
         
         <Menu>
-          <MenuButton className="text-gray-400 hover:text-white transition-colors p-1">
+          <MenuButton className="text-gray-400 hover:text-white transition-colors p-1 rounded-md">
             <MoreVertical size={20} />
           </MenuButton>
           
-          <MenuItems className="absolute right-0 mt-2 w-48 bg-[#252525] rounded-lg shadow-lg py-1 z-10 border border-gray-800">
+          <MenuItems
+            transition
+            anchor="bottom end"
+            className="w-52 origin-top-right rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm p-1 text-sm transition duration-100 ease-out [--anchor-gap:4px] focus:outline-none data-closed:scale-95 data-closed:opacity-0 z-50"
+          >
             <MenuItem>
               <button
                 onClick={() => setShowDeleteDialog(true)}
-                className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-[#2a2a2a] flex items-center gap-2"
+                className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-red-400 data-focus:bg-white/10"
               >
                 <Trash2 size={16} />
                 Delete article
@@ -118,7 +122,7 @@ function ArticleEditor() {
       </div>
 
       <div className="max-w-4xl mx-auto">
-        <div className="px-8 py-4">
+        <div className="px-8 py-4 space-y-1">
           <textarea
             ref={titleInputRef}
             value={title}
@@ -134,7 +138,7 @@ function ArticleEditor() {
               target.style.height = target.scrollHeight + 'px';
             }}
           />
-          <div className="text-sm text-gray-500 mt-2">
+          <div className="text-sm text-gray-500">
             {new Date(article._creationTime).toLocaleDateString("en-US", {
               year: "numeric",
               month: "short",

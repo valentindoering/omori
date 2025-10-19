@@ -39,7 +39,7 @@ function ArticlesList() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Image src="/favicon.ico" alt="omori logo" width={24} height={24} className="rounded" />
           <h1 className="text-2xl font-bold mb-1">omori</h1>
@@ -47,7 +47,7 @@ function ArticlesList() {
         <UserMenu />
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-2">
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-2">
         <div className="flex justify-end mb-2">
           <button
             onClick={handleCreateArticle}
@@ -68,7 +68,7 @@ function ArticlesList() {
                 <button
                   key={article._id}
                   onClick={() => router.push(`/article/${article._id}`)}
-                  className="w-full flex items-center gap-4 px-4 py-0.5 hover:bg-hover rounded-3xl transition-colors text-left"
+                  className="w-full flex items-center gap-4 px-4 py-0.5 hover:bg-hover cursor-pointer rounded-3xl transition-colors text-left"
                 >
                   <span className="text-base truncate min-w-0 flex-1">{article.title}</span>
                   <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0">
