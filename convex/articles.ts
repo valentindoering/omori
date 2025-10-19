@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { auth } from "./auth";
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
 
 /**
@@ -11,12 +11,10 @@ export const createArticle = mutation({
   args: {},
   returns: v.id("articles"),
   handler: async (ctx) => {
-    // Get the authenticated user
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
       throw new Error("Not authenticated");
     }
-    const userId = identity.subject;
 
     // Create article with empty content (TipTap will initialize it)
     const articleId = await ctx.db.insert("articles", {
@@ -44,18 +42,17 @@ export const listArticles = query({
         _id: v.id("articles"),
         _creationTime: v.number(),
         title: v.string(),
-        userId: v.string(),
+        userId: v.id("users"),
       })
     ),
     isDone: v.boolean(),
     continueCursor: v.string(),
   }),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
       throw new Error("Not authenticated");
     }
-    const userId = identity.subject;
 
     // Query articles by user, ordered by creation time (newest first)
     const result = await ctx.db
@@ -89,16 +86,15 @@ export const getArticle = query({
       _creationTime: v.number(),
       title: v.string(),
       content: v.string(),
-      userId: v.string(),
+      userId: v.id("users"),
     }),
     v.null()
   ),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
       throw new Error("Not authenticated");
     }
-    const userId = identity.subject;
 
     const article = await ctx.db.get(args.articleId);
     
@@ -121,11 +117,10 @@ export const updateTitle = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
       throw new Error("Not authenticated");
     }
-    const userId = identity.subject;
 
     const article = await ctx.db.get(args.articleId);
     
@@ -153,11 +148,10 @@ export const updateContent = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
       throw new Error("Not authenticated");
     }
-    const userId = identity.subject;
 
     const article = await ctx.db.get(args.articleId);
     
@@ -183,11 +177,10 @@ export const deleteArticle = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
       throw new Error("Not authenticated");
     }
-    const userId = identity.subject;
 
     const article = await ctx.db.get(args.articleId);
     if (!article || article.userId !== userId) {

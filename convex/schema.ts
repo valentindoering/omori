@@ -18,7 +18,7 @@ export default defineSchema({
   articles: defineTable({
     title: v.string(),
     content: v.string(), // Stored as JSON string from TipTap
-    userId: v.string(), // Reference to the authenticated user
+    userId: v.id("users"), // Reference to the authenticated user in the users table
   })
     // Index by userId (Convex automatically adds _creationTime to all indexes)
     .index("by_user", ["userId"]),
