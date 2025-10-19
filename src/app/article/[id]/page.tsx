@@ -8,12 +8,7 @@ import { useRouter, useParams } from "next/navigation";
 import { ChevronLeft, MoreVertical, Trash2 } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useEffect, useRef, useState } from "react";
-
-/**
- * Article editor page.
- * Shows the article title (editable) and TipTap editor for content.
- * Includes auto-save for both title and content.
- */
+import { Menu, MenuButton, MenuItem, MenuItems, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 
 export default function ArticlePage() {
   return (
@@ -34,26 +29,18 @@ function ArticleEditor() {
   const deleteArticle = useMutation(api.articles.deleteArticle);
 
   const [title, setTitle] = useState("");
-  const [isNewArticle, setIsNewArticle] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const titleInputRef = useRef<HTMLTextAreaElement>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const titleInputRef = useRef<HTMLTextAreaElement>(null);
   const titleSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const editorRef = useRef<ReturnType<typeof import("@tiptap/react").useEditor> | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const isDeletingRef = useRef(false);
 
-  // Initialize title when article loads
   useEffect(() => {
     if (article) {
       setTitle(article.title);
-      // If article is "Untitled", select the title for editing
-      if (article.title === "Untitled" && !isNewArticle) {
-        setIsNewArticle(true);
-        setTimeout(() => {
-          titleInputRef.current?.select();
-        }, 100);
+      if (article.title === "Untitled") {
+        setTimeout(() => titleInputRef.current?.select(), 100);
       }
-      // Auto-resize textarea on initial load
       setTimeout(() => {
         if (titleInputRef.current) {
           titleInputRef.current.style.height = 'auto';
@@ -61,26 +48,11 @@ function ArticleEditor() {
         }
       }, 0);
     }
-  }, [article, isNewArticle]);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMenu(false);
-      }
-    };
-    if (showMenu) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [showMenu]);
+  }, [article]);
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
-    if (titleSaveTimeoutRef.current) {
-      clearTimeout(titleSaveTimeoutRef.current);
-    }
+    if (titleSaveTimeoutRef.current) clearTimeout(titleSaveTimeoutRef.current);
     titleSaveTimeoutRef.current = setTimeout(() => {
       if (!isDeletingRef.current) {
         void updateTitle({ articleId, title: newTitle || "Untitled" });
@@ -95,23 +67,16 @@ function ArticleEditor() {
   };
 
   const handleDelete = async () => {
-    if (confirm("Are you sure you want to delete this article?")) {
-      isDeletingRef.current = true;
-      if (titleSaveTimeoutRef.current) {
-        clearTimeout(titleSaveTimeoutRef.current);
-      }
-      await deleteArticle({ articleId });
-      router.push("/");
-    }
+    isDeletingRef.current = true;
+    if (titleSaveTimeoutRef.current) clearTimeout(titleSaveTimeoutRef.current);
+    await deleteArticle({ articleId });
+    router.push("/");
   };
 
   const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      // Focus the TipTap editor
-      if (editorRef.current) {
-        editorRef.current.commands.focus();
-      }
+      editorRef.current?.commands.focus();
     }
   };
 
@@ -125,42 +90,34 @@ function ArticleEditor() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <div>
-        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <button
-            onClick={() => router.push("/")}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <ChevronLeft size={24} />
-          </button>
+      <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+        <button
+          onClick={() => router.push("/")}
+          className="text-gray-400 hover:text-white transition-colors"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        
+        <Menu>
+          <MenuButton className="text-gray-400 hover:text-white transition-colors p-1">
+            <MoreVertical size={20} />
+          </MenuButton>
           
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="text-gray-400 hover:text-white transition-colors p-1"
-            >
-              <MoreVertical size={20} />
-            </button>
-            
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-[#252525] rounded-lg shadow-lg py-1 z-10 border border-gray-800">
-                <button
-                  onClick={handleDelete}
-                  className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-[#2a2a2a] flex items-center gap-2"
-                >
-                  <Trash2 size={16} />
-                  Delete article
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+          <MenuItems className="absolute right-0 mt-2 w-48 bg-[#252525] rounded-lg shadow-lg py-1 z-10 border border-gray-800">
+            <MenuItem>
+              <button
+                onClick={() => setShowDeleteDialog(true)}
+                className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-[#2a2a2a] flex items-center gap-2"
+              >
+                <Trash2 size={16} />
+                Delete article
+              </button>
+            </MenuItem>
+          </MenuItems>
+        </Menu>
       </div>
 
-      {/* Article content */}
       <div className="max-w-4xl mx-auto">
-        {/* Title */}
         <div className="px-8 py-4">
           <textarea
             ref={titleInputRef}
@@ -170,9 +127,7 @@ function ArticleEditor() {
             placeholder="Untitled"
             rows={1}
             className="text-4xl font-bold w-full bg-transparent border-none outline-none focus:ring-0 placeholder-gray-700 resize-none overflow-hidden"
-            style={{
-              minHeight: '1.2em',
-            }}
+            style={{ minHeight: '1.2em' }}
             onInput={(e) => {
               const target = e.target as HTMLTextAreaElement;
               target.style.height = 'auto';
@@ -180,7 +135,6 @@ function ArticleEditor() {
             }}
           />
           <div className="text-sm text-gray-500 mt-2">
-
             {new Date(article._creationTime).toLocaleDateString("en-US", {
               year: "numeric",
               month: "short",
@@ -191,13 +145,40 @@ function ArticleEditor() {
           </div>
         </div>
 
-        {/* Editor */}
         <Editor
           content={article.content}
           onUpdate={handleContentUpdate}
           editorRef={editorRef}
         />
       </div>
+
+      <Dialog open={showDeleteDialog} onClose={() => setShowDeleteDialog(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="bg-[#252525] rounded-lg p-6 max-w-sm border border-gray-700">
+            <DialogTitle className="text-lg font-semibold text-white mb-2">
+              Delete article
+            </DialogTitle>
+            <p className="text-sm text-gray-400 mb-6">
+              Are you sure you want to delete this article? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteDialog(false)}
+                className="px-4 py-2 text-sm text-white hover:bg-hover rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 text-sm bg-red-500 text-white hover:bg-red-600 rounded-lg transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
     </div>
   );
 }
