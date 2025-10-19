@@ -6,10 +6,12 @@ import { DeleteArticleDialog } from "@/components/DeleteArticleDialog";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useRouter, useParams } from "next/navigation";
-import { ChevronLeft, MoreVertical, Trash2 } from "lucide-react";
+import { ChevronLeft, MoreVertical, Trash2, Check, Loader2 } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useEffect, useRef, useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+
+type SaveStatus = 'idle' | 'typing' | 'saving' | 'saved';
 
 export default function ArticlePage() {
   return (
@@ -31,10 +33,12 @@ function ArticleEditor() {
 
   const [title, setTitle] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const titleInputRef = useRef<HTMLTextAreaElement>(null);
   const titleSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const editorRef = useRef<ReturnType<typeof import("@tiptap/react").useEditor> | null>(null);
   const isDeletingRef = useRef(false);
+  const savedTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     if (article) {
@@ -53,18 +57,33 @@ function ArticleEditor() {
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
+    setSaveStatus('typing');
     if (titleSaveTimeoutRef.current) clearTimeout(titleSaveTimeoutRef.current);
-    titleSaveTimeoutRef.current = setTimeout(() => {
+    titleSaveTimeoutRef.current = setTimeout(async () => {
       if (!isDeletingRef.current) {
-        void updateTitle({ articleId, title: newTitle || "Untitled" });
+        setSaveStatus('saving');
+        await updateTitle({ articleId, title: newTitle || "Untitled" });
+        setSaveStatus('saved');
       }
     }, 1000);
   };
 
-  const handleContentUpdate = (content: string) => {
+  const handleContentUpdate = async (content: string) => {
     if (!isDeletingRef.current) {
-      void updateContent({ articleId, content });
+      await updateContent({ articleId, content });
+      setSaveStatus('saved');
+      
+      // Reset to idle after 2 seconds
+      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+      // savedTimeoutRef.current = setTimeout(() => {
+      //   setSaveStatus('idle');
+      // }, 2000);
     }
+  };
+
+  const handleStatusChange = (status: SaveStatus) => {
+    if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+    setSaveStatus(status);
   };
 
   const handleDelete = async () => {
@@ -99,27 +118,31 @@ function ArticleEditor() {
           <ChevronLeft size={24} />
         </button>
         
-        <Menu>
-          <MenuButton className="text-gray-400 hover:text-white transition-colors p-1 rounded-md">
-            <MoreVertical size={20} />
-          </MenuButton>
+        <div className="flex items-center gap-4">
+          <SaveIndicator status={saveStatus} />
           
-          <MenuItems
-            transition
-            anchor="bottom end"
-            className="w-52 origin-top-right rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm p-1 text-sm transition duration-100 ease-out [--anchor-gap:4px] focus:outline-none data-closed:scale-95 data-closed:opacity-0 z-50"
-          >
-            <MenuItem>
-              <button
-                onClick={() => setShowDeleteDialog(true)}
-                className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-red-400 data-focus:bg-white/10"
-              >
-                <Trash2 size={16} />
-                Delete article
-              </button>
-            </MenuItem>
-          </MenuItems>
-        </Menu>
+          <Menu>
+            <MenuButton className="text-gray-400 hover:text-white transition-colors p-1 rounded-md">
+              <MoreVertical size={20} />
+            </MenuButton>
+            
+            <MenuItems
+              transition
+              anchor="bottom end"
+              className="w-52 origin-top-right rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm p-1 text-sm transition duration-100 ease-out [--anchor-gap:4px] focus:outline-none data-closed:scale-95 data-closed:opacity-0 z-50"
+            >
+              <MenuItem>
+                <button
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-red-400 data-focus:bg-white/10"
+                >
+                  <Trash2 size={16} />
+                  Delete article
+                </button>
+              </MenuItem>
+            </MenuItems>
+          </Menu>
+        </div>
       </div>
 
       <div className="max-w-4xl mx-auto">
@@ -153,6 +176,7 @@ function ArticleEditor() {
         <Editor
           content={article.content}
           onUpdate={handleContentUpdate}
+          onStatusChange={handleStatusChange}
           editorRef={editorRef}
         />
       </div>
@@ -167,3 +191,20 @@ function ArticleEditor() {
   );
 }
 
+function SaveIndicator({ status }: { status: SaveStatus }) {
+  if (status === 'idle') return null;
+
+  return (
+    <div className="flex items-center">
+      {status === 'typing' && (
+        <div className="w-2 h-2 rounded-full bg-gray-500" />
+      )}
+      {status === 'saving' && (
+        <Loader2 size={16} className="animate-spin text-gray-400" />
+      )}
+      {status === 'saved' && (
+        <Check size={16} className="text-gray-400" />
+      )}
+    </div>
+  );
+}

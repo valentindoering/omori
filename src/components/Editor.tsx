@@ -7,12 +7,12 @@ import { useEffect, useRef } from "react";
 interface EditorProps {
   content: string;
   onUpdate: (content: string) => void;
-  editorRef?: React.MutableRefObject<ReturnType<typeof useEditor> | null>;
+  onStatusChange?: (status: 'idle' | 'typing' | 'saving' | 'saved') => void;
+  editorRef?: { current: ReturnType<typeof useEditor> | null };
 }
 
-export function Editor({ content, onUpdate, editorRef }: EditorProps) {
+export function Editor({ content, onUpdate, onStatusChange, editorRef }: EditorProps) {
   const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-  const periodicSaveRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -24,8 +24,11 @@ export function Editor({ content, onUpdate, editorRef }: EditorProps) {
       },
     },
     onUpdate: ({ editor }) => {
+      onStatusChange?.('typing');
+      
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(() => {
+        onStatusChange?.('saving');
         onUpdate(JSON.stringify(editor.getJSON()));
       }, 1000);
     },
@@ -34,23 +37,6 @@ export function Editor({ content, onUpdate, editorRef }: EditorProps) {
   useEffect(() => {
     if (editorRef) editorRef.current = editor;
   }, [editor, editorRef]);
-
-  useEffect(() => {
-    periodicSaveRef.current = setInterval(() => {
-      if (editor) onUpdate(JSON.stringify(editor.getJSON()));
-    }, 30000);
-
-    return () => {
-      if (periodicSaveRef.current) clearInterval(periodicSaveRef.current);
-    };
-  }, [editor, onUpdate]);
-
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-      if (editor) onUpdate(JSON.stringify(editor.getJSON()));
-    };
-  }, [editor, onUpdate]);
 
   return <EditorContent editor={editor} />;
 }
