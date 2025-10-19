@@ -31,7 +31,7 @@ export function Editor({ content, onUpdate, editorRef }: EditorProps) {
     editorProps: {
       attributes: {
         class:
-          "prose prose-invert max-w-none focus:outline-none min-h-[60vh] px-16 py-8",
+          "prose prose-invert max-w-none focus:outline-none min-h-[60vh] px-8 py-8",
       },
     },
     onUpdate: ({ editor }) => {

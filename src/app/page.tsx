@@ -50,7 +50,7 @@ function ArticlesList() {
     <div className="min-h-screen">
       {/* Header */}
       <div>
-        <div className="max-w-6xl mx-auto px-8 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image 
               src="/favicon.ico" 
@@ -66,7 +66,7 @@ function ArticlesList() {
       </div>
 
       {/* Main content */}
-      <div className="max-w-6xl mx-auto px-8 py-2">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-2">
         {/* Create button */}
         <div className="flex justify-end mb-2">
           <button
@@ -92,17 +92,25 @@ function ArticlesList() {
                 <button
                   key={article._id}
                   onClick={() => router.push(`/article/${article._id}`)}
-                  className="w-full flex items-center justify-between cursor-pointer px-4 py-0.5 hover:bg-hover rounded-3xl transition-colors text-left"
+                  className="w-full flex items-center gap-4 cursor-pointer px-4 py-0.5 hover:bg-hover rounded-3xl transition-colors text-left"
                 >
-                  <span className="text-base">{article.title}</span>
-                  <span className="text-sm text-gray-500">
-                    {new Date(article._creationTime).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
+                  <span className="text-base truncate min-w-0 flex-1">{article.title}</span>
+                  <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0">
+                    <span className="hidden sm:inline">
+                      {new Date(article._creationTime).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    <span className="sm:hidden">
+                      {new Date(article._creationTime).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
                   </span>
                 </button>
               ))}

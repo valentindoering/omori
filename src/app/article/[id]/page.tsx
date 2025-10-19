@@ -36,7 +36,7 @@ function ArticleEditor() {
   const [title, setTitle] = useState("");
   const [isNewArticle, setIsNewArticle] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const titleInputRef = useRef<HTMLInputElement>(null);
+  const titleInputRef = useRef<HTMLTextAreaElement>(null)
   const titleSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const editorRef = useRef<ReturnType<typeof import("@tiptap/react").useEditor> | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -53,6 +53,13 @@ function ArticleEditor() {
           titleInputRef.current?.select();
         }, 100);
       }
+      // Auto-resize textarea on initial load
+      setTimeout(() => {
+        if (titleInputRef.current) {
+          titleInputRef.current.style.height = 'auto';
+          titleInputRef.current.style.height = titleInputRef.current.scrollHeight + 'px';
+        }
+      }, 0);
     }
   }, [article, isNewArticle]);
 
@@ -98,7 +105,7 @@ function ArticleEditor() {
     }
   };
 
-  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       // Focus the TipTap editor
@@ -120,7 +127,7 @@ function ArticleEditor() {
     <div className="min-h-screen">
       {/* Header */}
       <div>
-        <div className="max-w-4xl mx-auto px-8 py-4 flex justify-between items-center">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
           <button
             onClick={() => router.push("/")}
             className="text-gray-400 hover:text-white transition-colors"
@@ -154,15 +161,23 @@ function ArticleEditor() {
       {/* Article content */}
       <div className="max-w-4xl mx-auto">
         {/* Title */}
-        <div className="px-16 py-4">
-          <input
+        <div className="px-8 py-4">
+          <textarea
             ref={titleInputRef}
-            type="text"
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
             onKeyDown={handleTitleKeyDown}
             placeholder="Untitled"
-            className="text-4xl font-bold w-full bg-transparent border-none outline-none focus:ring-0 placeholder-gray-700"
+            rows={1}
+            className="text-4xl font-bold w-full bg-transparent border-none outline-none focus:ring-0 placeholder-gray-700 resize-none overflow-hidden"
+            style={{
+              minHeight: '1.2em',
+            }}
+            onInput={(e) => {
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = 'auto';
+              target.style.height = target.scrollHeight + 'px';
+            }}
           />
           <div className="text-sm text-gray-500 mt-2">
 
