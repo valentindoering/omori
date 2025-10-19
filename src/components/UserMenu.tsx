@@ -4,10 +4,12 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { useRouter } from "next/navigation";
 
 export function UserMenu() {
   const { signOut } = useAuthActions();
   const user = useQuery(api.users.getCurrentUser);
+  const router = useRouter();
   
   const initials = user?.name
     ?.split(" ")
@@ -32,6 +34,14 @@ export function UserMenu() {
           <p className="text-xs text-gray-400 truncate">{user?.email}</p>
         </div>
         <div className="p-1">
+          <MenuItem>
+            <button
+              onClick={() => router.push("/import")}
+              className="w-full text-left px-3 py-1.5 rounded-lg text-white data-focus:bg-white/10 transition-colors"
+            >
+              Import from Notion
+            </button>
+          </MenuItem>
           <MenuItem>
             <button
               onClick={() => void signOut()}

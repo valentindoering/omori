@@ -67,6 +67,7 @@ export const createArticle = mutation({
       }),
       userId,
       icon: randomIcon,
+      createdAt: Date.now(), // Set creation time to now for new articles
     });
 
     return articleId;
@@ -75,7 +76,7 @@ export const createArticle = mutation({
 
 /**
  * List all articles for the current user with pagination.
- * Returns articles sorted by creation time (newest first).
+ * Returns articles sorted by createdAt (newest first).
  */
 export const listArticles = query({
   args: { paginationOpts: paginationOptsValidator },
@@ -84,6 +85,7 @@ export const listArticles = query({
       v.object({
         _id: v.id("articles"),
         _creationTime: v.number(),
+        createdAt: v.number(),
         title: v.string(),
         userId: v.id("users"),
         icon: v.optional(v.string()),
@@ -98,10 +100,10 @@ export const listArticles = query({
       throw new Error("Not authenticated");
     }
 
-    // Query articles by user, ordered by creation time (newest first)
+    // Query articles by user, ordered by createdAt (newest first)
     const result = await ctx.db
       .query("articles")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .withIndex("by_user_and_createdAt", (q) => q.eq("userId", userId))
       .order("desc")
       .paginate(args.paginationOpts);
 
@@ -109,6 +111,7 @@ export const listArticles = query({
       page: result.page.map((article) => ({
         _id: article._id,
         _creationTime: article._creationTime,
+        createdAt: article.createdAt,
         title: article.title,
         userId: article.userId,
         icon: article.icon,
@@ -129,10 +132,12 @@ export const getArticle = query({
     v.object({
       _id: v.id("articles"),
       _creationTime: v.number(),
+      createdAt: v.number(),
       title: v.string(),
       content: v.string(),
       userId: v.id("users"),
       icon: v.optional(v.string()),
+      originalHtml: v.optional(v.string()),
     }),
     v.null()
   ),
@@ -241,6 +246,49 @@ export const updateIcon = mutation({
     });
 
     return null;
+  },
+});
+
+/**
+ * Batch import articles from Notion HTML export.
+ * Preserves original creation time from Notion.
+ */
+export const batchImportArticles = mutation({
+  args: {
+    articles: v.array(
+      v.object({
+        title: v.string(),
+        content: v.string(), // TipTap JSON format
+        createdAt: v.number(), // Original Notion creation time
+        icon: v.optional(v.string()),
+        originalHtml: v.optional(v.string()), // Original HTML from Notion
+      })
+    ),
+  },
+  returns: v.object({
+    success: v.boolean(),
+    count: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not authenticated");
+    }
+
+    let count = 0;
+    for (const article of args.articles) {
+      await ctx.db.insert("articles", {
+        title: article.title,
+        content: article.content,
+        userId,
+        icon: article.icon,
+        createdAt: article.createdAt,
+        originalHtml: article.originalHtml,
+      });
+      count++;
+    }
+
+    return { success: true, count };
   },
 });
 

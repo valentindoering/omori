@@ -172,7 +172,7 @@ function ArticleEditor() {
             }}
           />
           <div className="text-sm text-gray-500">
-            {new Date(article._creationTime).toLocaleDateString("en-US", {
+            {new Date(article.createdAt).toLocaleDateString("en-US", {
               year: "numeric",
               month: "short",
               day: "numeric",

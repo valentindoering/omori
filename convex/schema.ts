@@ -19,9 +19,12 @@ export default defineSchema({
     title: v.string(),
     content: v.string(), // Stored as JSON string from TipTap
     userId: v.id("users"), // Reference to the authenticated user in the users table
-    icon: v.optional(v.string()), // Custom icon for the article (emoji), defaults to 📄
+    icon: v.optional(v.string()), // Custom icon for the article
+    createdAt: v.number(), // Creation time - set to current time for new articles, or original Notion time for imports
+    originalHtml: v.optional(v.string()), // Original HTML from Notion import (preserved for reference)
   })
     // Index by userId (Convex automatically adds _creationTime to all indexes)
-    .index("by_user", ["userId"]),
+    .index("by_user", ["userId"])
+    .index("by_user_and_createdAt", ["userId", "createdAt"]),
 });
 

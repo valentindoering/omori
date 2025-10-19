@@ -20,7 +20,7 @@ export function Editor({ content, onUpdate, onStatusChange, editorRef }: EditorP
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: "prose prose-invert max-w-none focus:outline-none min-h-[60vh] px-8",
+        class: "prose prose-invert max-w-none focus:outline-none min-h-[60vh] pb-64 px-8",
       },
     },
     onUpdate: ({ editor }) => {

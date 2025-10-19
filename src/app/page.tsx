@@ -70,6 +70,9 @@ function ArticlesList() {
                   ? ((LucideIcons as any)[article.icon] || FileText)
                   : FileText;
                 
+                // Use createdAt for display
+                const displayDate = article.createdAt;
+                
                 return (
                   <button
                     key={article._id}
@@ -82,7 +85,7 @@ function ArticlesList() {
                     <span className="text-base truncate min-w-0 flex-1">{article.title}</span>
                     <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0">
                       <span className="hidden sm:inline">
-                        {new Date(article._creationTime).toLocaleDateString("en-US", {
+                        {new Date(displayDate).toLocaleDateString("en-US", {
                           year: "2-digit",
                           month: "short",
                           day: "numeric",
@@ -91,7 +94,7 @@ function ArticlesList() {
                         })}
                       </span>
                       <span className="sm:hidden">
-                        {new Date(article._creationTime).toLocaleDateString("en-US", {
+                        {new Date(displayDate).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
                         })}
