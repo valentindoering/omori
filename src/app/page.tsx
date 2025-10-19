@@ -4,12 +4,24 @@ import { AuthWrapper } from "@/components/AuthWrapper";
 import { UserMenu } from "@/components/UserMenu";
 import { usePaginatedQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
-import { Plus, FileText, Search, SearchCheck, Loader2 } from "lucide-react";
+import { Plus, FileText, Search, SearchCheck } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { SearchControl } from "@/components/SearchControl";
+
+type SearchResult = {
+  _id: Id<"articles">;
+  _creationTime: number;
+  createdAt: number;
+  title: string;
+  userId: Id<"users">;
+  icon?: string;
+  hasEmbedding: boolean;
+  _score: number;
+};
 
 export default function Home() {
   return (
@@ -22,6 +34,7 @@ export default function Home() {
 function ArticlesList() {
   const router = useRouter();
   const createArticle = useMutation(api.articles.createArticle);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchByEmbedding = useAction((api.embeddings as any).searchByEmbedding);
 
   // Title search state
@@ -33,7 +46,7 @@ function ArticlesList() {
   const [embedSearchQuery, setEmbedSearchQuery] = useState("");
   const [debouncedEmbedSearch, setDebouncedEmbedSearch] = useState("");
   const [isEmbedSearchOpen, setIsEmbedSearchOpen] = useState(false);
-  const [embedResults, setEmbedResults] = useState<any[]>([]);
+  const [embedResults, setEmbedResults] = useState<SearchResult[]>([]);
   const [embedLoading, setEmbedLoading] = useState(false);
 
   // Input focus handled in SearchControl
