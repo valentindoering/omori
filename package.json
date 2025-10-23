@@ -5,6 +5,7 @@
   "scripts": {
     "dev:next": "next dev --turbopack",
     "dev:convex": "npx convex dev",
+    "start-omori": "concurrently -n 0,init -c gray,white \"npm run dev\" \"cursor . && sleep 5 && npx convex dashboard && open http://localhost:3000\"",
     "dev": "concurrently -k -n next,convex -c blue,green \"npm:dev:next\" \"npm:dev:convex\"",
     "build": "next build --turbopack",
     "start": "next start",
