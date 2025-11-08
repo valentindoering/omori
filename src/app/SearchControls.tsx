@@ -9,9 +9,11 @@ type SearchControlsProps = {
   state: SearchState;
   dispatch: Dispatch<SearchAction>;
   status: "LoadingFirstPage" | "CanLoadMore" | "Exhausted" | "LoadingMore";
+  titleSpinner: boolean;
+  embedSpinner: boolean;
 };
 
-export function SearchControls({ state, dispatch, status }: SearchControlsProps) {
+export function SearchControls({ state, dispatch, status, titleSpinner, embedSpinner }: SearchControlsProps) {
 
   return (
     <>
@@ -22,7 +24,7 @@ export function SearchControls({ state, dispatch, status }: SearchControlsProps)
         setQuery={(query) => dispatch({ type: "UPDATE_TITLE_QUERY", query })}
         onClear={() => dispatch({ type: "CLEAR_TITLE" })}
         placeholder="Title search"
-        showSpinner={status === "LoadingFirstPage" && state.mode === "title" && state.debouncedTitleQuery !== ""}
+        showSpinner={titleSpinner}
         idleIcon={<Search size={16} />}
         ariaLabel="Toggle search"
       />
@@ -34,7 +36,7 @@ export function SearchControls({ state, dispatch, status }: SearchControlsProps)
         setQuery={(query) => dispatch({ type: "UPDATE_EMBED_QUERY", query })}
         onClear={() => dispatch({ type: "CLEAR_EMBED" })}
         placeholder="Embedding search"
-        showSpinner={state.embedLoading && state.mode === "embed" && state.debouncedEmbedQuery !== ""}
+        showSpinner={embedSpinner}
         idleIcon={<SearchCheck size={16} />}
         ariaLabel="Toggle embedding search"
       />

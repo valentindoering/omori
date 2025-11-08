@@ -5,14 +5,13 @@ import { usePaginatedQuery, useMutation } from "convex/react";
 import { Preloaded, usePreloadedQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useRouter } from "next/navigation";
-import { Plus, FileText } from "lucide-react";
-import * as LucideIcons from "lucide-react";
+import { Plus } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useSearch } from "./useSearch";
 import { SearchControls } from "./SearchControls";
-import type { SearchResult } from "./useSearch";
+import { ArticleItem } from "./ArticleItem";
 
 export default function ArticleList({ 
   preloadedArticles 
@@ -21,7 +20,13 @@ export default function ArticleList({
 }) {
   const router = useRouter();
   const createArticle = useMutation(api.articles.createArticle);
-  const { state, dispatch, titleSearchQuery } = useSearch();
+  const {
+    state,
+    dispatch,
+    titleSearchQuery,
+    isEmbedSearching,
+    isTitleSearching,
+  } = useSearch();
   const [clickedArticleId, setClickedArticleId] = useState<string | null>(null);
   const [isCreatingArticle, setIsCreatingArticle] = useState(false);
 
@@ -47,10 +52,10 @@ export default function ArticleList({
   const loadMore = searchLoadMore;
 
   // Determine which results to show (including embed search results)
-  const results = state.mode === "embed" && state.debouncedEmbedQuery 
+  const results = isEmbedSearching
     ? state.embedResults 
     : allArticles;
-  const status = state.mode === "embed" && state.debouncedEmbedQuery
+  const status = isEmbedSearching
     ? (state.embedLoading ? "LoadingFirstPage" : "CanLoadMore")
     : articlesStatus;
 
@@ -81,7 +86,13 @@ export default function ArticleList({
       <div className="max-w-5xl mx-auto px-4 sm:px-8 py-2">
         <div className="flex items-center justify-end mb-2">
           <div className="flex items-center">
-            <SearchControls state={state} dispatch={dispatch} status={status} />
+            <SearchControls
+              state={state}
+              dispatch={dispatch}
+              status={status}
+              titleSpinner={status === "LoadingFirstPage" && isTitleSearching}
+              embedSpinner={state.embedLoading && isEmbedSearching}
+            />
             <button
               onClick={handleCreateArticle}
               disabled={isCreatingArticle}
@@ -101,7 +112,7 @@ export default function ArticleList({
           {results.length === 0 ? (
             status === "LoadingFirstPage" ? (
               null
-            ) : state.mode !== "idle" && (state.debouncedTitleQuery || state.debouncedEmbedQuery) ? (
+            ) : state.mode !== "idle" && (isTitleSearching || isEmbedSearching) ? (
               <div className="text-center py-16 text-gray-500">
                 <p>No matching articles.</p>
               </div>
@@ -112,63 +123,18 @@ export default function ArticleList({
             )
           ) : (
             <div className="space-y-1">
-              {results.map((article) => {
-                const IconComponent = article.icon 
-                  ? ((LucideIcons as Record<string, unknown>)[article.icon] as typeof FileText || FileText)
-                  : FileText;
-                
-                // Use createdAt for display
-                const displayDate = article.createdAt;
-                
-                return (
-                  <button
-                    key={article._id}
-                    onClick={() => {
-                      setClickedArticleId(article._id);
-                      router.push(`/article/${article._id}`);
-                    }}
-                    disabled={clickedArticleId === article._id}
-                    className="w-full flex items-center gap-3 px-4 py-0.5 hover:bg-hover cursor-pointer rounded-3xl transition-colors text-left disabled:opacity-50 disabled:cursor-wait"
-                  >
-                    <span className="flex-shrink-0 text-gray-400">
-                      {clickedArticleId === article._id ? (
-                        <Loader2 size={20} className="animate-spin" />
-                      ) : (
-                        <IconComponent size={20} />
-                      )}
-                    </span>
-                    <span className="text-base truncate min-w-0 flex-1">{article.title}</span>
-                    <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0 flex items-center gap-3">
-                      {state.mode === "embed" && state.debouncedEmbedQuery && "_score" in article && (
-                        <span className="text-xs font-mono text-gray-400">
-                          {(article._score * 100).toFixed(1)}%
-                        </span>
-                      )}
-                      <span className="hidden sm:inline">
-                        {new Date(displayDate).toLocaleDateString("en-US", {
-                          year: "2-digit",
-                          month: "short",
-                          day: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                      <span className="sm:hidden">
-                        {new Date(displayDate).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </span>
-                      <span
-                        className={`inline-block w-1.5 h-1.5 rounded-full ${
-                          article.hasEmbedding ? "bg-gray-400" : "bg-gray-700"
-                        }`}
-                        title={article.hasEmbedding ? "Embedding ready" : "No embedding yet"}
-                      />
-                    </span>
-                  </button>
-                );
-              })}
+              {results.map((article) => (
+                <ArticleItem
+                  key={article._id}
+                  article={article}
+                  isPending={clickedArticleId === article._id}
+                  showScore={isEmbedSearching}
+                  onSelect={() => {
+                    setClickedArticleId(article._id);
+                    router.push(`/article/${article._id}`);
+                  }}
+                />
+              ))}
               
               {status === "LoadingMore" && (
                 <div className="text-center py-4 text-gray-500">Loading more...</div>

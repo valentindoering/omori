@@ -128,6 +128,11 @@ export function useSearch() {
   const searchByEmbedding = useAction((api.embeddings as any).searchByEmbedding);
   const [state, dispatch] = useReducer(searchReducer, initialSearchState);
 
+  const isTitleMode = state.mode === "title";
+  const isEmbedMode = state.mode === "embed";
+  const isTitleSearching = isTitleMode && state.debouncedTitleQuery !== "";
+  const isEmbedSearching = isEmbedMode && state.debouncedEmbedQuery !== "";
+
   // Debounce title query
   useEffect(() => {
     const id = setTimeout(
@@ -159,7 +164,11 @@ export function useSearch() {
   return {
     state,
     dispatch: dispatch as Dispatch<SearchAction>,
-    titleSearchQuery: state.mode === "title" && state.debouncedTitleQuery ? state.debouncedTitleQuery : undefined,
+    titleSearchQuery: isTitleMode && state.debouncedTitleQuery ? state.debouncedTitleQuery : undefined,
+    isTitleMode,
+    isEmbedMode,
+    isTitleSearching,
+    isEmbedSearching,
   };
 }
 
