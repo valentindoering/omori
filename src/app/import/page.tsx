@@ -1,5 +1,5 @@
 import Import from "./Import";
 
 export default function ImportPage() {
-    return <Import />;
+  return <Import />;
 }
