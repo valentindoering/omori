@@ -86,16 +86,16 @@ export default function ArticleList({
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Image src="/favicon.ico" alt="omori logo" width={24} height={24} className="rounded" />
-          <h1 className="text-2xl font-bold mb-1">omori</h1>
+          <Image src="/favicon.ico" alt="omori logo" width={28} height={28} className="rounded" />
+          <h1 className="text-3xl font-bold mb-1">omori</h1>
         </div>
         <UserMenu />
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-2">
-        <div className="flex items-center justify-end mb-2">
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-3">
+        <div className="flex items-center justify-end mb-3">
           <div className="flex items-center">
             <SearchControls
               state={state}
@@ -107,13 +107,13 @@ export default function ArticleList({
             <button
               onClick={handleCreateArticle}
               disabled={isCreatingArticle}
-              className="flex items-center gap-2 p-2 hover:bg-hover rounded-full transition-colors disabled:opacity-50 disabled:cursor-wait"
+              className="flex items-center gap-2 p-2.5 hover:bg-hover rounded-full transition-colors disabled:opacity-50 disabled:cursor-wait"
               aria-label="Create article"
             >
               {isCreatingArticle ? (
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={20} className="animate-spin" />
               ) : (
-                <Plus size={16} />
+                <Plus size={20} />
               )}
             </button>
           </div>
@@ -124,24 +124,24 @@ export default function ArticleList({
 
             // because of our preloaded data and displayResults logic this will never appear
             status === "LoadingFirstPage" ? (
-              <div className="text-center py-16 text-gray-500">
-                <p>Loading...</p>
+              <div className="text-center py-20 text-gray-500">
+                <p className="text-base">Loading...</p>
               </div>
 
 
             ) : state.mode !== "idle" && (isTitleSearching || isEmbedSearching) ? (
-              <div className="text-center py-16 text-gray-500">
-                <p>No matching articles.</p>
+              <div className="text-center py-20 text-gray-500">
+                <p className="text-base">No matching articles.</p>
               </div>
 
               
             ) : (
-              <div className="text-center py-16 text-gray-500">
-                <p>No articles yet. Create your first one!</p>
+              <div className="text-center py-20 text-gray-500">
+                <p className="text-base">No articles yet. Create your first one!</p>
               </div>
             )
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {displayResults.map((article) => (
                 <ArticleItem
                   key={article._id}
@@ -156,7 +156,7 @@ export default function ArticleList({
               ))}
               
               {status === "LoadingMore" && (
-                <div className="text-center py-4 text-gray-500">Loading more...</div>
+                <div className="text-center py-5 text-gray-500 text-base">Loading more...</div>
               )}
             </div>
           )}

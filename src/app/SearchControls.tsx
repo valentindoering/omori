@@ -25,7 +25,7 @@ export function SearchControls({ state, dispatch, status, titleSpinner, embedSpi
         onClear={() => dispatch({ type: "CLEAR_TITLE" })}
         placeholder="Title search"
         showSpinner={titleSpinner}
-        idleIcon={<Search size={16} />}
+        idleIcon={<Search size={20} />}
         ariaLabel="Toggle search"
       />
 
@@ -37,7 +37,7 @@ export function SearchControls({ state, dispatch, status, titleSpinner, embedSpi
         onClear={() => dispatch({ type: "CLEAR_EMBED" })}
         placeholder="Embedding search"
         showSpinner={embedSpinner}
-        idleIcon={<SearchCheck size={16} />}
+        idleIcon={<SearchCheck size={20} />}
         ariaLabel="Toggle embedding search"
       />
     </>

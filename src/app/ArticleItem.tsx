@@ -26,13 +26,13 @@ export function ArticleItem({ article, isPending, onSelect, showScore }: Article
     <button
       onClick={onSelect}
       disabled={isPending}
-      className="w-full flex items-center gap-3 px-4 py-0.5 hover:bg-hover cursor-pointer rounded-3xl transition-colors text-left disabled:opacity-50 disabled:cursor-wait"
+      className="w-full flex items-center gap-3.5 px-5 py-1.5 hover:bg-hover cursor-pointer rounded-3xl transition-colors text-left disabled:opacity-50 disabled:cursor-wait"
     >
       <span className="flex-shrink-0 text-gray-400">
-        {isPending ? <Loader2 size={20} className="animate-spin" /> : <Icon size={20} />}
+        {isPending ? <Loader2 size={24} className="animate-spin" /> : <Icon size={24} />}
       </span>
       <span className="text-base truncate min-w-0 flex-1">{article.title}</span>
-      <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0 flex items-center gap-3">
+      <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0 flex items-center gap-3.5">
         {showScore && (
           <span className="text-xs font-mono text-gray-400">
             {((article._score ?? 0) * 100).toFixed(1)}%

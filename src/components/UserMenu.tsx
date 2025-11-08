@@ -21,24 +21,24 @@ export function UserMenu() {
 
   return (
     <Menu>
-      <MenuButton className="w-8 h-8 rounded-full hover:bg-hover flex items-center justify-center text-xs text-white font-medium transition-colors">
+      <MenuButton className="w-10 h-10 rounded-full hover:bg-hover flex items-center justify-center text-sm text-white font-medium transition-colors">
         {initials}
       </MenuButton>
 
       <MenuItems
         transition
         anchor="bottom end"
-        className="w-52 origin-top-right rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm text-sm text-white transition duration-100 ease-out [--anchor-gap:4px] focus:outline-none data-closed:scale-95 data-closed:opacity-0 z-50"
+        className="w-56 origin-top-right rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm text-base text-white transition duration-100 ease-out [--anchor-gap:5px] focus:outline-none data-closed:scale-95 data-closed:opacity-0 z-50"
       >
-        <div className="px-4 py-3 border-b border-white/5">
-          <p className="text-sm text-white truncate">{user?.name}</p>
-          <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+        <div className="px-4 py-3.5 border-b border-white/5">
+          <p className="text-base text-white truncate">{user?.name}</p>
+          <p className="text-sm text-gray-400 truncate">{user?.email}</p>
         </div>
-        <div className="p-1">
+        <div className="p-1.5">
           <MenuItem>
             <button
               onClick={() => router.push("/import")}
-              className="w-full text-left px-3 py-1.5 rounded-lg text-white data-focus:bg-white/10 transition-colors"
+              className="w-full text-left px-3.5 py-2 rounded-lg text-white data-focus:bg-white/10 transition-colors"
             >
               Import from Notion
             </button>
@@ -46,7 +46,7 @@ export function UserMenu() {
           <MenuItem>
             <button
               onClick={() => void recalcAll({})}
-              className="w-full text-left px-3 py-1.5 rounded-lg text-white data-focus:bg-white/10 transition-colors"
+              className="w-full text-left px-3.5 py-2 rounded-lg text-white data-focus:bg-white/10 transition-colors"
             >
               Calculate embeddings
             </button>
@@ -57,7 +57,7 @@ export function UserMenu() {
                 await signOut();
                 window.location.href = "/signin";
               }}
-              className="w-full text-left px-3 py-1.5 rounded-lg text-white data-focus:bg-white/10 transition-colors"
+              className="w-full text-left px-3.5 py-2 rounded-lg text-white data-focus:bg-white/10 transition-colors"
             >
               Log out
             </button>
