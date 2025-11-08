@@ -6,6 +6,14 @@ import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 export const metadata: Metadata = {
   title: "omori",
   description: "A minimalistic article editor",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+  },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
