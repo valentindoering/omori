@@ -7,7 +7,7 @@ export default function SignIn() {
   const { signIn } = useAuthActions();
 
   return (
-    <div className="h-screen flex items-center justify-center">
+    <div className="min-h-[100dvh] flex items-center justify-center">
       <div className="text-center flex flex-col items-center space-y-1">
         <Image src="/favicon.ico" alt="omori logo" width={32} height={32} className="rounded" />
         <h1 className="text-2xl font-bold">omori</h1>

@@ -85,7 +85,7 @@ export default function ArticleList({
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-[100dvh]">
       <div className="sticky top-0 z-10 bg-background">
         <div className="max-w-5xl mx-auto px-4 sm:px-8 py-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -123,7 +123,7 @@ export default function ArticleList({
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-8">
-        <div onScroll={handleScroll} className="max-h-[calc(100vh-180px)] overflow-y-auto">
+        <div onScroll={handleScroll} className="max-h-[calc(100dvh-180px)] overflow-y-auto">
           {displayResults.length === 0 ? (
 
             // because of our preloaded data and displayResults logic this will never appear
