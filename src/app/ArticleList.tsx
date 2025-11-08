@@ -7,11 +7,11 @@ import { api } from "../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { useSearch } from "./useSearch";
 import { SearchControls } from "./SearchControls";
-import { ArticleItem } from "./ArticleItem";
+import { ArticleItem, type ArticleListItem } from "./ArticleItem";
 
 export default function ArticleList({ 
   preloadedArticles 
@@ -29,6 +29,7 @@ export default function ArticleList({
   } = useSearch();
   const [clickedArticleId, setClickedArticleId] = useState<string | null>(null);
   const [isCreatingArticle, setIsCreatingArticle] = useState(false);
+  const previousResultsRef = useRef<Array<ArticleListItem>>([]);
 
   // Use preloaded query when in idle mode (no search), otherwise use regular paginated query
   const initialArticles = usePreloadedQuery(preloadedArticles);
@@ -58,6 +59,16 @@ export default function ArticleList({
   const status = isEmbedSearching
     ? (state.embedLoading ? "LoadingFirstPage" : "CanLoadMore")
     : articlesStatus;
+
+  // Keep previous results visible during loading to avoid flicker
+  if (results.length > 0) {
+    previousResultsRef.current = results;
+  } else if (status !== "LoadingFirstPage") {
+    previousResultsRef.current = [];
+  }
+  const displayResults = results.length === 0 && status === "LoadingFirstPage" && previousResultsRef.current.length > 0
+    ? previousResultsRef.current
+    : results;
 
   const handleCreateArticle = async () => {
     setIsCreatingArticle(true);
@@ -109,13 +120,21 @@ export default function ArticleList({
         </div>
 
         <div onScroll={handleScroll} className="max-h-[calc(100vh-180px)] overflow-y-auto">
-          {results.length === 0 ? (
+          {displayResults.length === 0 ? (
+
+            // because of our preloaded data and displayResults logic this will never appear
             status === "LoadingFirstPage" ? (
-              null
+              <div className="text-center py-16 text-gray-500">
+                <p>Loading...</p>
+              </div>
+
+
             ) : state.mode !== "idle" && (isTitleSearching || isEmbedSearching) ? (
               <div className="text-center py-16 text-gray-500">
                 <p>No matching articles.</p>
               </div>
+
+              
             ) : (
               <div className="text-center py-16 text-gray-500">
                 <p>No articles yet. Create your first one!</p>
@@ -123,7 +142,7 @@ export default function ArticleList({
             )
           ) : (
             <div className="space-y-1">
-              {results.map((article) => (
+              {displayResults.map((article) => (
                 <ArticleItem
                   key={article._id}
                   article={article}
