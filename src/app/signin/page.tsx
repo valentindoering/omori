@@ -3,7 +3,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import Image from "next/image";
 
-export default function SignInPage() {
+export default function SignIn() {
   const { signIn } = useAuthActions();
 
   return (
