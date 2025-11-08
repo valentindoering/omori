@@ -7,7 +7,7 @@ import Google from "@auth/core/providers/google";
  * This sets up authentication using Google OAuth provider.
  * Users will be able to sign in with their Google account.
  */
-export const { auth, signIn, signOut, store } = convexAuth({
+export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [Google],
 });
 

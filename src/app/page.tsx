@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthWrapper } from "@/components/AuthWrapper";
 import { UserMenu } from "@/components/UserMenu";
 import { usePaginatedQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -131,11 +130,7 @@ function searchReducer(state: SearchState, action: SearchAction): SearchState {
 }
 
 export default function Home() {
-  return (
-    <AuthWrapper>
-      <ArticlesList />
-    </AuthWrapper>
-  );
+  return <ArticlesList />;
 }
 
 function ArticlesList() {

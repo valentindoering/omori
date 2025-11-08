@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthWrapper } from "@/components/AuthWrapper";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
@@ -18,11 +17,7 @@ interface ParsedArticle {
 }
 
 export default function ImportPage() {
-  return (
-    <AuthWrapper>
-      <ImportContent />
-    </AuthWrapper>
-  );
+  return <ImportContent />;
 }
 
 function ImportContent() {

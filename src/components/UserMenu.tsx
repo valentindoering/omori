@@ -53,7 +53,10 @@ export function UserMenu() {
           </MenuItem>
           <MenuItem>
             <button
-              onClick={() => void signOut()}
+              onClick={async () => {
+                await signOut();
+                window.location.href = "/signin";
+              }}
               className="w-full text-left px-3 py-1.5 rounded-lg text-white data-focus:bg-white/10 transition-colors"
             >
               Log out

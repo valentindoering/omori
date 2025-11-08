@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthWrapper } from "@/components/AuthWrapper";
 import { Editor } from "@/components/Editor";
 import { DeleteArticleDialog } from "@/components/DeleteArticleDialog";
 import { IconPicker } from "@/components/IconPicker";
@@ -15,11 +14,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 type SaveStatus = 'idle' | 'typing' | 'saving' | 'saved';
 
 export default function ArticlePage() {
-  return (
-    <AuthWrapper>
-      <ArticleEditor />
-    </AuthWrapper>
-  );
+  return <ArticleEditor />;
 }
 
 function ArticleEditor() {

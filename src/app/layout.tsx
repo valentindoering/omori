@@ -15,11 +15,11 @@ export default function RootLayout({
 }>) {
   return (
     <ConvexAuthNextjsServerProvider>
-      <html lang="en" className="dark">
-        <body className="min-h-screen antialiased">
-          <ConvexClientProvider>{children}</ConvexClientProvider>
-        </body>
-      </html>
+    <html lang="en" className="dark">
+      <body className="min-h-screen antialiased" suppressHydrationWarning>
+        <ConvexClientProvider>{children}</ConvexClientProvider>
+      </body>
+    </html>
     </ConvexAuthNextjsServerProvider>
   );
 }
