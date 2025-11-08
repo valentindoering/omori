@@ -9,8 +9,9 @@ import { useRouter } from "next/navigation";
 import { Plus, FileText, Search, SearchCheck } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import Image from "next/image";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { SearchControl } from "@/components/SearchControl";
+import { Loader2 } from "lucide-react";
 
 type SearchResult = {
   _id: Id<"articles">;
@@ -141,6 +142,8 @@ export default function ArticleList({
   const searchByEmbedding = useAction((api.embeddings as any).searchByEmbedding);
 
   const [state, dispatch] = useReducer(searchReducer, initialSearchState);
+  const [clickedArticleId, setClickedArticleId] = useState<string | null>(null);
+  const [isCreatingArticle, setIsCreatingArticle] = useState(false);
 
   // Debounce title query
   useEffect(() => {
@@ -200,7 +203,10 @@ export default function ArticleList({
     : articlesStatus;
 
   const handleCreateArticle = async () => {
+    setIsCreatingArticle(true);
     const articleId = await createArticle();
+    setIsCreatingArticle(false);
+    setClickedArticleId(articleId);
     router.push(`/article/${articleId}`);
   };
 
@@ -251,10 +257,15 @@ export default function ArticleList({
 
             <button
               onClick={handleCreateArticle}
-              className="flex items-center gap-2 p-2 hover:bg-hover rounded-full transition-colors"
+              disabled={isCreatingArticle}
+              className="flex items-center gap-2 p-2 hover:bg-hover rounded-full transition-colors disabled:opacity-50 disabled:cursor-wait"
               aria-label="Create article"
             >
-              <Plus size={16} />
+              {isCreatingArticle ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Plus size={16} />
+              )}
             </button>
           </div>
         </div>
@@ -285,11 +296,19 @@ export default function ArticleList({
                 return (
                   <button
                     key={article._id}
-                    onClick={() => router.push(`/article/${article._id}`)}
-                    className="w-full flex items-center gap-3 px-4 py-0.5 hover:bg-hover cursor-pointer rounded-3xl transition-colors text-left"
+                    onClick={() => {
+                      setClickedArticleId(article._id);
+                      router.push(`/article/${article._id}`);
+                    }}
+                    disabled={clickedArticleId === article._id}
+                    className="w-full flex items-center gap-3 px-4 py-0.5 hover:bg-hover cursor-pointer rounded-3xl transition-colors text-left disabled:opacity-50 disabled:cursor-wait"
                   >
                     <span className="flex-shrink-0 text-gray-400">
-                      <IconComponent size={20} />
+                      {clickedArticleId === article._id ? (
+                        <Loader2 size={20} className="animate-spin" />
+                      ) : (
+                        <IconComponent size={20} />
+                      )}
                     </span>
                     <span className="text-base truncate min-w-0 flex-1">{article.title}</span>
                     <span className="text-sm text-gray-500 whitespace-nowrap flex-shrink-0 flex items-center gap-3">

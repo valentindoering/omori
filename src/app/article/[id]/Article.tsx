@@ -33,6 +33,7 @@ export default function Article({
   const [title, setTitle] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const [isNavigatingBack, setIsNavigatingBack] = useState(false);
   const titleInputRef = useRef<HTMLTextAreaElement>(null);
   const titleSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const editorRef = useRef<ReturnType<typeof import("@tiptap/react").useEditor> | null>(null);
@@ -115,10 +116,18 @@ export default function Article({
     <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
         <button
-          onClick={() => router.push("/")}
-          className="text-gray-400 hover:text-white transition-colors"
+          onClick={() => {
+            setIsNavigatingBack(true);
+            router.push("/");
+          }}
+          disabled={isNavigatingBack}
+          className="text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-wait"
         >
-          <ChevronLeft size={24} />
+          {isNavigatingBack ? (
+            <Loader2 size={24} className="animate-spin" />
+          ) : (
+            <ChevronLeft size={24} />
+          )}
         </button>
         
         <div className="flex items-center gap-4">
