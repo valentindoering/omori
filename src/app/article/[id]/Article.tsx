@@ -114,46 +114,48 @@ export default function Article({
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-        <button
-          onClick={() => {
-            setIsNavigatingBack(true);
-            router.push("/");
-          }}
-          disabled={isNavigatingBack}
-          className="text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-wait"
-        >
-          {isNavigatingBack ? (
-            <Loader2 size={24} className="animate-spin" />
-          ) : (
-            <ChevronLeft size={24} />
-          )}
-        </button>
-        
-        <div className="flex items-center gap-4">
-          <SaveIndicator status={saveStatus} />
+      <div className="sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-8 py-4 flex justify-between items-center">
+          <button
+            onClick={() => {
+              setIsNavigatingBack(true);
+              router.push("/");
+            }}
+            disabled={isNavigatingBack}
+            className="text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-wait p-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/5"
+          >
+            {isNavigatingBack ? (
+              <Loader2 size={24} className="animate-spin" />
+            ) : (
+              <ChevronLeft size={24} />
+            )}
+          </button>
           
-          <Menu>
-            <MenuButton className="text-gray-400 hover:text-white transition-colors p-1 rounded-md">
-              <MoreVertical size={20} />
-            </MenuButton>
+          <div className="flex items-center gap-4">
+            <SaveIndicator status={saveStatus} />
             
-            <MenuItems
-              transition
-              anchor="bottom end"
-              className="w-52 origin-top-right rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm p-1 text-sm transition duration-100 ease-out [--anchor-gap:4px] focus:outline-none data-closed:scale-95 data-closed:opacity-0 z-50"
-            >
-              <MenuItem>
-                <button
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-red-400 data-focus:bg-white/10"
-                >
-                  <Trash2 size={16} />
-                  Delete article
-                </button>
-              </MenuItem>
-            </MenuItems>
-          </Menu>
+            <Menu>
+              <MenuButton className="text-gray-400 hover:text-white transition-colors p-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/5">
+                <MoreVertical size={20} />
+              </MenuButton>
+              
+              <MenuItems
+                transition
+                anchor="bottom end"
+                className="w-52 origin-top-right rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm p-1 text-sm transition duration-100 ease-out [--anchor-gap:4px] focus:outline-none data-closed:scale-95 data-closed:opacity-0 z-50"
+              >
+                <MenuItem>
+                  <button
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-red-400 data-focus:bg-white/10"
+                  >
+                    <Trash2 size={16} />
+                    Delete article
+                  </button>
+                </MenuItem>
+              </MenuItems>
+            </Menu>
+          </div>
         </div>
       </div>
 
