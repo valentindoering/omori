@@ -85,8 +85,8 @@ export default function ArticleList({
   };
 
   return (
-    <div className="min-h-[100dvh]">
-      <div className="sticky top-0 z-10 bg-background">
+    <div className="h-[100dvh] flex flex-col overflow-x-hidden">
+      <div className="sticky top-0 z-10 bg-background flex-shrink-0">
         <div className="max-w-5xl mx-auto px-4 sm:px-8 py-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image src="/favicon.ico" alt="omori logo" width={28} height={28} className="rounded" />
@@ -122,8 +122,8 @@ export default function ArticleList({
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-8">
-        <div onScroll={handleScroll} className="max-h-[calc(100dvh-180px)] overflow-y-auto">
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 flex-1 flex flex-col min-h-0 min-w-0 w-full">
+        <div onScroll={handleScroll} className="flex-1 overflow-y-auto overflow-x-hidden w-full">
           {displayResults.length === 0 ? (
 
             // because of our preloaded data and displayResults logic this will never appear
@@ -145,7 +145,7 @@ export default function ArticleList({
               </div>
             )
           ) : (
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 mb-20">
               {displayResults.map((article) => (
                 <ArticleItem
                   key={article._id}
