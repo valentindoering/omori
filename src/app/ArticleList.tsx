@@ -86,39 +86,43 @@ export default function ArticleList({
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Image src="/favicon.ico" alt="omori logo" width={28} height={28} className="rounded" />
-          <h1 className="text-3xl font-bold mb-1">omori</h1>
+      <div className="sticky top-0 z-10 bg-background">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Image src="/favicon.ico" alt="omori logo" width={28} height={28} className="rounded" />
+            <h1 className="text-3xl font-bold mb-1">omori</h1>
+          </div>
+          <UserMenu />
         </div>
-        <UserMenu />
-      </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-3">
-        <div className="flex items-center justify-end mb-3">
-          <div className="flex items-center">
-            <SearchControls
-              state={state}
-              dispatch={dispatch}
-              status={status}
-              titleSpinner={status === "LoadingFirstPage" && isTitleSearching}
-              embedSpinner={state.embedLoading && isEmbedSearching}
-            />
-            <button
-              onClick={handleCreateArticle}
-              disabled={isCreatingArticle}
-              className="flex items-center gap-2 p-2.5 hover:bg-hover rounded-full transition-colors disabled:opacity-50 disabled:cursor-wait"
-              aria-label="Create article"
-            >
-              {isCreatingArticle ? (
-                <Loader2 size={20} className="animate-spin" />
-              ) : (
-                <Plus size={20} />
-              )}
-            </button>
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <div className="flex items-center justify-end mb-2">
+            <div className="flex items-center">
+              <SearchControls
+                state={state}
+                dispatch={dispatch}
+                status={status}
+                titleSpinner={status === "LoadingFirstPage" && isTitleSearching}
+                embedSpinner={state.embedLoading && isEmbedSearching}
+              />
+              <button
+                onClick={handleCreateArticle}
+                disabled={isCreatingArticle}
+                className="flex items-center gap-2 p-2.5 hover:bg-hover rounded-full transition-colors disabled:opacity-50 disabled:cursor-wait"
+                aria-label="Create article"
+              >
+                {isCreatingArticle ? (
+                  <Loader2 size={20} className="animate-spin" />
+                ) : (
+                  <Plus size={20} />
+                )}
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-5xl mx-auto px-4 sm:px-8">
         <div onScroll={handleScroll} className="max-h-[calc(100vh-180px)] overflow-y-auto">
           {displayResults.length === 0 ? (
 
