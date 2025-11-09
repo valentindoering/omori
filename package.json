@@ -9,7 +9,8 @@
     "dev": "concurrently -k -n next,convex -c blue,green \"npm:dev:next\" \"npm:dev:convex\"",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate-icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@convex-dev/auth": "^0.0.90",
@@ -34,6 +35,7 @@
     "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "15.5.6",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
