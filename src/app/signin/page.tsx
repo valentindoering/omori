@@ -10,7 +10,7 @@ export default function SignIn() {
   return (
     <div className="min-h-[100dvh] bg-[#191919] text-[#E3E2E0]">
       {/* Header with Sign In Button */}
-      <header className="w-full border-b border-gray-800">
+      <header className="fixed top-0 left-0 right-0 w-full border-b border-gray-800 bg-[#191919]/70 backdrop-blur-sm z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Image src="/favicon.ico" alt="omori logo" width={24} height={24} className="rounded" />
@@ -32,7 +32,7 @@ export default function SignIn() {
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-4xl mx-auto px-6 py-20">
+      <main className="max-w-4xl mx-auto px-6 pt-24 pb-20">
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">
             Your diary, smarter.
