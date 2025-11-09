@@ -101,7 +101,6 @@ export default function ArticleList({
               <SearchControls
                 state={state}
                 dispatch={dispatch}
-                status={status}
                 titleSpinner={status === "LoadingFirstPage" && isTitleSearching}
                 embedSpinner={state.embedLoading && isEmbedSearching}
               />

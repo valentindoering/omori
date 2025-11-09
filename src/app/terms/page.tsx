@@ -9,7 +9,7 @@ export default function TermsOfUse() {
           <section>
             <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
             <p className="text-gray-300 leading-relaxed">
-              By accessing and using Omori Cloud ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Use, please do not use our Service.
+              By accessing and using Omori Cloud (&quot;the Service&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Use, please do not use our Service.
             </p>
           </section>
 
@@ -43,7 +43,7 @@ export default function TermsOfUse() {
             <h2 className="text-2xl font-semibold mb-4">4. User Content</h2>
             <div className="space-y-4 text-gray-300 leading-relaxed">
               <p>
-                You retain all rights to the diary entries and content you create using Omori Cloud ("User Content"). By using the Service, you grant us a limited, non-exclusive license to store, process, and display your User Content solely for the purpose of providing the Service to you.
+                You retain all rights to the diary entries and content you create using Omori Cloud (&quot;User Content&quot;). By using the Service, you grant us a limited, non-exclusive license to store, process, and display your User Content solely for the purpose of providing the Service to you.
               </p>
               <p>
                 You are solely responsible for your User Content and represent and warrant that:
@@ -63,7 +63,7 @@ export default function TermsOfUse() {
                 If you choose to connect your Notion account, you acknowledge that:
               </p>
               <ul className="list-disc list-inside space-y-2 text-gray-300 leading-relaxed ml-4">
-                <li>Your use of Notion is subject to Notion's Terms of Service and Privacy Policy</li>
+                <li>Your use of Notion is subject to Notion&apos;s Terms of Service and Privacy Policy</li>
                 <li>We will access and sync data between Omori Cloud and your Notion workspace as necessary for the integration to function</li>
                 <li>You can disconnect the Notion integration at any time</li>
                 <li>We are not responsible for any issues arising from your use of Notion or the Notion integration</li>
@@ -117,7 +117,7 @@ export default function TermsOfUse() {
           <section>
             <h2 className="text-2xl font-semibold mb-4">11. Changes to Terms</h2>
             <p className="text-gray-300 leading-relaxed">
-              We reserve the right to modify these Terms of Use at any time. We will notify you of any changes by posting the new Terms of Use on this page and updating the "Last updated" date. Your continued use of the Service after such modifications constitutes your acceptance of the updated terms.
+              We reserve the right to modify these Terms of Use at any time. We will notify you of any changes by posting the new Terms of Use on this page and updating the &quot;Last updated&quot; date. Your continued use of the Service after such modifications constitutes your acceptance of the updated terms.
             </p>
           </section>
 

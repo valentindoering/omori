@@ -64,7 +64,7 @@ export default function SignIn() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Smart Search</h3>
             <p className="text-gray-400 text-sm">
-              Find old entries using embedding-based search. Discover connections you didn't know existed.
+              Find old entries using embedding-based search. Discover connections you didn&apos;t know existed.
             </p>
           </div>
 

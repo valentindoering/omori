@@ -9,7 +9,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
             <p className="text-gray-300 leading-relaxed">
-              Welcome to Omori Cloud ("we," "our," or "us"). Omori Cloud is a diary application that allows users to write, manage, and interact with their diary entries. We are committed to protecting your privacy and ensuring the security of your personal information.
+              Welcome to Omori Cloud (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). Omori Cloud is a diary application that allows users to write, manage, and interact with their diary entries. We are committed to protecting your privacy and ensuring the security of your personal information.
             </p>
           </section>
 
@@ -54,10 +54,10 @@ export default function PrivacyPolicy() {
             <h2 className="text-2xl font-semibold mb-4">5. Third-Party Services</h2>
             <div className="space-y-4 text-gray-300 leading-relaxed">
               <p>
-                <strong className="text-[#E3E2E0]">Google Authentication:</strong> We use Google Sign-In for authentication. Your use of Google Sign-In is subject to Google's Privacy Policy.
+                <strong className="text-[#E3E2E0]">Google Authentication:</strong> We use Google Sign-In for authentication. Your use of Google Sign-In is subject to Google&apos;s Privacy Policy.
               </p>
               <p>
-                <strong className="text-[#E3E2E0]">Notion Integration:</strong> When you connect your Notion account, your use of Notion is subject to Notion's Privacy Policy and Terms of Service. We only access the data necessary for the integration to function.
+                <strong className="text-[#E3E2E0]">Notion Integration:</strong> When you connect your Notion account, your use of Notion is subject to Notion&apos;s Privacy Policy and Terms of Service. We only access the data necessary for the integration to function.
               </p>
             </div>
           </section>
@@ -84,7 +84,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4">8. Children's Privacy</h2>
+            <h2 className="text-2xl font-semibold mb-4">8. Children&apos;s Privacy</h2>
             <p className="text-gray-300 leading-relaxed">
               Our service is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe we have collected information from a child under 13, please contact us immediately.
             </p>
@@ -93,7 +93,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-semibold mb-4">9. Changes to This Privacy Policy</h2>
             <p className="text-gray-300 leading-relaxed">
-              We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date. You are advised to review this Privacy Policy periodically for any changes.
+              We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the &quot;Last updated&quot; date. You are advised to review this Privacy Policy periodically for any changes.
             </p>
           </section>
 

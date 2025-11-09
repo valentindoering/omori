@@ -8,12 +8,11 @@ import type { SearchState, SearchAction } from "./useSearch";
 type SearchControlsProps = {
   state: SearchState;
   dispatch: Dispatch<SearchAction>;
-  status: "LoadingFirstPage" | "CanLoadMore" | "Exhausted" | "LoadingMore";
   titleSpinner: boolean;
   embedSpinner: boolean;
 };
 
-export function SearchControls({ state, dispatch, status, titleSpinner, embedSpinner }: SearchControlsProps) {
+export function SearchControls({ state, dispatch, titleSpinner, embedSpinner }: SearchControlsProps) {
 
   return (
     <>
