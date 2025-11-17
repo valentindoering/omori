@@ -127,7 +127,7 @@ export function AIReflectionDialog({
                   <div className="whitespace-pre-wrap">{reflection}</div>
                 ) : (
                   <p className="text-white/55 text-xs">
-                    Use the "AI reflection" option in the menu to generate a brief inspiration for this article.
+                    Use the &quot;AI reflection&quot; option in the menu to generate a brief inspiration for this article.
                   </p>
                 )}
               </div>

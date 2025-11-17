@@ -10,7 +10,7 @@ import { api } from "../../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, MoreVertical, Trash2, Check, Loader2, Sparkles } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ArticleSkeleton } from "./ArticleSkeleton";
 
@@ -115,21 +115,21 @@ export default function Article({
     await updateIcon({ articleId, icon: iconName });
   };
 
-  const loadReflection = async (options?: { force?: boolean }) => {
+  const loadReflection = useCallback(async (options?: { force?: boolean }) => {
     setReflectionError(null);
     if (!options?.force && reflection) return;
     setIsReflectionLoading(true);
     try {
       const result = await getReflection({ articleId });
       setReflection(result);
-    } catch (_err) {
+    } catch {
       setReflectionError(
         "Could not generate a reflection right now. Please try again in a moment.",
       );
     } finally {
       setIsReflectionLoading(false);
     }
-  };
+  }, [reflection, getReflection, articleId]);
 
   // Auto-refresh reflection roughly once a minute while the dialog is open
   useEffect(() => {
@@ -154,7 +154,7 @@ export default function Article({
         reflectionIntervalRef.current = undefined;
       }
     };
-  }, [showReflectionDialog, articleId]);
+  }, [showReflectionDialog, articleId, loadReflection]);
 
   if (!articleData) {
     return <ArticleSkeleton />;
