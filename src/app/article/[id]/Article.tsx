@@ -3,9 +3,9 @@
 import { Editor } from "@/components/Editor";
 import { DeleteArticleDialog } from "@/components/DeleteArticleDialog";
 import { IconPicker } from "@/components/IconPicker";
-import { useMutation, Preloaded, usePreloadedQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, MoreVertical, Trash2, Check, Loader2 } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useEffect, useRef, useState } from "react";
@@ -14,16 +14,14 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 type SaveStatus = 'idle' | 'typing' | 'saving' | 'saved';
 
 export default function Article({ 
-  preloadedArticle 
+  articleId 
 }: { 
-  preloadedArticle: Preloaded<typeof api.articles.getArticle> 
+  articleId: Id<"articles">
 }) {
   const router = useRouter();
-  const params = useParams();
-  const articleId = params.id as Id<"articles">;
 
-  // Preloaded query is reactive (like useQuery) and will stay up to date.
-  const articleData = usePreloadedQuery(preloadedArticle);
+  // Simple useQuery - no preloading needed
+  const articleData = useQuery(api.articles.getArticle, { articleId });
   
   const updateTitle = useMutation(api.articles.updateTitle);
   const updateContent = useMutation(api.articles.updateContent);

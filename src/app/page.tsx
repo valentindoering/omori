@@ -1,20 +1,12 @@
-import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
-import { preloadQuery } from "convex/nextjs";
-import { api } from "../../convex/_generated/api";
+"use client";
+
 import ArticleList from "./ArticleList";
+import { AuthWrapper } from "@/components/AuthWrapper";
 
-export default async function Home() {
-  const token = await convexAuthNextjsToken();
-  
-  // Preload the initial page of articles
-  const preloadedArticles = await preloadQuery(
-    api.articles.listArticles,
-    {
-      paginationOpts: { numItems: 20, cursor: null },
-      search: undefined,
-    },
-    { token }
+export default function Home() {
+  return (
+    <AuthWrapper>
+      <ArticleList />
+    </AuthWrapper>
   );
-
-  return <ArticleList preloadedArticles={preloadedArticles} />;
 }

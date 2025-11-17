@@ -2,7 +2,6 @@
 
 import { UserMenu } from "@/components/UserMenu";
 import { usePaginatedQuery, useMutation } from "convex/react";
-import { Preloaded, usePreloadedQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
@@ -13,11 +12,7 @@ import { useSearch } from "./useSearch";
 import { SearchControls } from "./SearchControls";
 import { ArticleItem, type ArticleListItem } from "./ArticleItem";
 
-export default function ArticleList({ 
-  preloadedArticles 
-}: { 
-  preloadedArticles: Preloaded<typeof api.articles.listArticles> 
-}) {
+export default function ArticleList() {
   const router = useRouter();
   const createArticle = useMutation(api.articles.createArticle);
   const {
@@ -31,8 +26,7 @@ export default function ArticleList({
   const [isCreatingArticle, setIsCreatingArticle] = useState(false);
   const previousResultsRef = useRef<Array<ArticleListItem>>([]);
 
-  // Use preloaded query when in idle mode (no search), otherwise use regular paginated query
-  const initialArticles = usePreloadedQuery(preloadedArticles);
+  // Use regular paginated query - simple and straightforward
   const { results: searchArticles, status: searchStatus, loadMore: searchLoadMore } = usePaginatedQuery(
     api.articles.listArticles,
     { search: titleSearchQuery },
@@ -41,24 +35,13 @@ export default function ArticleList({
     }
   );
 
-  // Determine which results to show - use preloaded data when idle, otherwise use paginated query results
-  const allArticles = (state.mode === "idle" && !state.debouncedTitleQuery) 
-    ? initialArticles.page 
-    : searchArticles;
-  const articlesStatus = (state.mode === "idle" && !state.debouncedTitleQuery)
-    ? (initialArticles.isDone ? "Exhausted" : "CanLoadMore")
-    : searchStatus;
-  // For loadMore, if we're using preloaded data, we need to switch to paginated query
-  // So we'll always use paginated query but skip it initially when we have preloaded data
-  const loadMore = searchLoadMore;
-
   // Determine which results to show (including embed search results)
   const results = isEmbedSearching
     ? state.embedResults 
-    : allArticles;
+    : searchArticles;
   const status = isEmbedSearching
     ? (state.embedLoading ? "LoadingFirstPage" : "CanLoadMore")
-    : articlesStatus;
+    : searchStatus;
 
   // Keep previous results visible during loading to avoid flicker
   if (results.length > 0) {
@@ -81,7 +64,7 @@ export default function ArticleList({
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
     const bottom = target.scrollHeight - target.scrollTop <= target.clientHeight + 100;
-    if (bottom && status === "CanLoadMore") void loadMore(10);
+    if (bottom && status === "CanLoadMore") void searchLoadMore(10);
   };
 
   return (
@@ -124,20 +107,14 @@ export default function ArticleList({
       <div className="max-w-5xl mx-auto px-4 sm:px-8 flex-1 flex flex-col min-h-0 min-w-0 w-full">
         <div onScroll={handleScroll} className="flex-1 overflow-y-auto overflow-x-hidden w-full">
           {displayResults.length === 0 ? (
-
-            // because of our preloaded data and displayResults logic this will never appear
             status === "LoadingFirstPage" ? (
               <div className="text-center py-20 text-gray-500">
                 <p className="text-base">Loading...</p>
               </div>
-
-
             ) : state.mode !== "idle" && (isTitleSearching || isEmbedSearching) ? (
               <div className="text-center py-20 text-gray-500">
                 <p className="text-base">No matching articles.</p>
               </div>
-
-              
             ) : (
               <div className="text-center py-20 text-gray-500">
                 <p className="text-base">No articles yet. Create your first one!</p>

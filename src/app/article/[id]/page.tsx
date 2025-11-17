@@ -1,24 +1,17 @@
-import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
-import { preloadQuery } from "convex/nextjs";
-import { api } from "../../../../convex/_generated/api";
+"use client";
+
 import Article from "./Article";
+import { useParams } from "next/navigation";
 import { Id } from "../../../../convex/_generated/dataModel";
+import { AuthWrapper } from "@/components/AuthWrapper";
 
-export default async function ArticlePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const token = await convexAuthNextjsToken();
-  const { id } = await params;
-  const articleId = id as Id<"articles">;
+export default function ArticlePage() {
+  const params = useParams();
+  const articleId = params.id as Id<"articles">;
 
-  // Preload the article data
-  const preloadedArticle = await preloadQuery(
-    api.articles.getArticle,
-    { articleId },
-    { token }
+  return (
+    <AuthWrapper>
+      <Article articleId={articleId} />
+    </AuthWrapper>
   );
-
-  return <Article preloadedArticle={preloadedArticle} />;
 }
