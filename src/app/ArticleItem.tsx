@@ -26,7 +26,9 @@ export function ArticleItem({ article, isPending, onSelect, showScore }: Article
     <button
       onClick={onSelect}
       disabled={isPending}
-      className="w-full flex items-center gap-3.5 px-5 py-1.5 hover:bg-hover cursor-pointer rounded-3xl transition-colors text-left disabled:opacity-50 disabled:cursor-wait"
+      className={`w-full flex items-center gap-3.5 px-5 py-1.5 hover:bg-hover cursor-pointer rounded-3xl text-left transition-all duration-150 disabled:cursor-wait ${
+        isPending ? "bg-hover/80 opacity-70 scale-[0.90]" : "disabled:opacity-50"
+      }`}
     >
       <span className="flex-shrink-0 text-gray-400">
         {isPending ? <Loader2 size={24} className="animate-spin" /> : <Icon size={24} />}

@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 import { useSearch } from "./useSearch";
 import { SearchControls } from "./SearchControls";
 import { ArticleItem, type ArticleListItem } from "./ArticleItem";
+import { ArticleListSkeleton } from "./ArticleListSkeleton";
 
 export default function ArticleList() {
   const router = useRouter();
@@ -111,9 +112,7 @@ export default function ArticleList() {
         <div onScroll={handleScroll} className="flex-1 overflow-y-auto overflow-x-hidden w-full">
           {displayResults.length === 0 ? (
             status === "LoadingFirstPage" ? (
-              <div className="text-center py-20 text-gray-500">
-                <p className="text-base">Loading...</p>
-              </div>
+              <ArticleListSkeleton />
             ) : state.mode !== "idle" && (isTitleSearching || isEmbedSearching) ? (
               <div className="text-center py-20 text-gray-500">
                 <p className="text-base">No matching articles.</p>

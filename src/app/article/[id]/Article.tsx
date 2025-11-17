@@ -10,6 +10,7 @@ import { ChevronLeft, MoreVertical, Trash2, Check, Loader2 } from "lucide-react"
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useEffect, useRef, useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { ArticleSkeleton } from "./ArticleSkeleton";
 
 type SaveStatus = 'idle' | 'typing' | 'saving' | 'saved';
 
@@ -103,11 +104,7 @@ export default function Article({
   };
 
   if (!articleData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">Loading...</div>
-      </div>
-    );
+    return <ArticleSkeleton />;
   }
 
   return (
@@ -120,7 +117,9 @@ export default function Article({
               router.push("/");
             }}
             disabled={isNavigatingBack}
-            className="text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-wait"
+            className={`text-gray-400 hover:text-white transition-all duration-150 disabled:cursor-wait ${
+              isNavigatingBack ? "opacity-70 scale-[0.90]" : "disabled:opacity-50"
+            }`}
           >
             {isNavigatingBack ? (
               <Loader2 size={24} className="animate-spin" />
