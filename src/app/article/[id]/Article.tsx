@@ -120,7 +120,7 @@ export default function Article({
               router.push("/");
             }}
             disabled={isNavigatingBack}
-            className="text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-wait p-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/5"
+            className="text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-wait"
           >
             {isNavigatingBack ? (
               <Loader2 size={24} className="animate-spin" />
@@ -133,7 +133,7 @@ export default function Article({
             <SaveIndicator status={saveStatus} />
             
             <Menu>
-              <MenuButton className="text-gray-400 hover:text-white transition-colors p-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/5">
+              <MenuButton className="text-gray-400 hover:text-white transition-colors">
                 <MoreVertical size={20} />
               </MenuButton>
               
