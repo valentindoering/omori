@@ -5,6 +5,7 @@ import { Authenticated, Unauthenticated } from "convex/react";
 import { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Brand } from "./Brand";
 
 export function AuthWrapper({ children }: { children: ReactNode }) {
   const { signIn } = useAuthActions();
@@ -18,7 +19,7 @@ export function AuthWrapper({ children }: { children: ReactNode }) {
             <div className="flex flex-col md:flex-row items-center justify-between gap-12 md:gap-16">
               {/* Centered logo, title, copy, single sign-in button */}
               <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start gap-6">
-                <div className="flex flex-col items-center md:items-start gap-3">
+                <div className="flex items-center gap-4 mb-2">
                   <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-[0_18px_60px_rgba(0,0,0,0.6)] backdrop-blur-md">
                     <Image
                       src="/favicon.ico"
@@ -28,9 +29,7 @@ export function AuthWrapper({ children }: { children: ReactNode }) {
                       className="rounded"
                     />
                   </div>
-                  <span className="text-sm tracking-[0.25em] uppercase text-gray-500">
-                    omori
-                  </span>
+                  <Brand variant="hero" />
                 </div>
 
                 <div className="space-y-5">

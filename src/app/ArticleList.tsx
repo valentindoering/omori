@@ -1,6 +1,7 @@
 "use client";
 
 import { UserMenu } from "@/components/UserMenu";
+import { Brand } from "@/components/Brand";
 import { usePaginatedQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useRouter } from "next/navigation";
@@ -75,9 +76,7 @@ export default function ArticleList() {
             <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-[0_14px_40px_rgba(0,0,0,0.55)] backdrop-blur-md">
               <Image src="/favicon.ico" alt="omori logo" width={22} height={22} className="rounded" />
             </div>
-            <span className="text-xs md:text-sm tracking-[0.25em] uppercase text-gray-500">
-              omori
-            </span>
+            <Brand variant="app" />
           </div>
           <UserMenu />
         </div>
