@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as aiReflection from "../aiReflection.js";
 import type * as articles from "../articles.js";
 import type * as auth from "../auth.js";
 import type * as embeddings from "../embeddings.js";
@@ -30,6 +31,7 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  aiReflection: typeof aiReflection;
   articles: typeof articles;
   auth: typeof auth;
   embeddings: typeof embeddings;

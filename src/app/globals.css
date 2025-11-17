@@ -11,7 +11,7 @@
 
 html {
   /* Ensure background extends into safe areas */
-  background: linear-gradient(to bottom, #050506, #101011, #181819);
+  background: linear-gradient(to bottom, #050506, #0c0c0d, #141415);
   /* Explicit background color so overscroll "behind" area isn't white */
   background-color: #050506;
   /* Prevent horizontal scrolling */
@@ -21,7 +21,7 @@ html {
 }
 
 body {
-  background: linear-gradient(to bottom, #050506, #101011, #181819);
+  background: linear-gradient(to bottom, #050506, #0c0c0d, #141415);
   /* Match html background color for seamless overscroll */
   background-color: #050506;
   color: var(--foreground);

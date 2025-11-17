@@ -15,6 +15,11 @@ import { authTables } from "@convex-dev/auth/server";
 export default defineSchema({
   ...authTables,
   
+  userSettings: defineTable({
+    userId: v.id("users"),
+    aiPrompt: v.optional(v.string()), // Custom AI prompt for reflections
+  }).index("by_user", ["userId"]),
+  
   articles: defineTable({
     title: v.string(),
     content: v.string(), // Stored as JSON string from TipTap

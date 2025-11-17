@@ -3,10 +3,12 @@
 import { Editor } from "@/components/Editor";
 import { DeleteArticleDialog } from "@/components/DeleteArticleDialog";
 import { IconPicker } from "@/components/IconPicker";
-import { useMutation, useQuery } from "convex/react";
+import { AIReflectionDialog } from "@/components/AIReflectionDialog";
+import { EditPromptDialog } from "@/components/EditPromptDialog";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, MoreVertical, Trash2, Check, Loader2 } from "lucide-react";
+import { ChevronLeft, MoreVertical, Trash2, Check, Loader2, Sparkles } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useEffect, useRef, useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -28,16 +30,26 @@ export default function Article({
   const updateContent = useMutation(api.articles.updateContent);
   const updateIcon = useMutation(api.articles.updateIcon);
   const deleteArticle = useMutation(api.articles.deleteArticle);
+  const getReflection = useAction(api.aiReflection.getArticleReflection);
+  const updateAiPrompt = useMutation(api.users.updateAiPrompt);
+  const userPrompt = useQuery(api.users.getAiPrompt);
 
   const [title, setTitle] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showReflectionDialog, setShowReflectionDialog] = useState(false);
+  const [showEditPromptDialog, setShowEditPromptDialog] = useState(false);
+  const [reflection, setReflection] = useState<string | null>(null);
+  const [reflectionError, setReflectionError] = useState<string | null>(null);
+  const [isReflectionLoading, setIsReflectionLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [isNavigatingBack, setIsNavigatingBack] = useState(false);
+  const [reflectionHeight, setReflectionHeight] = useState(250);
   const titleInputRef = useRef<HTMLTextAreaElement>(null);
   const titleSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const editorRef = useRef<ReturnType<typeof import("@tiptap/react").useEditor> | null>(null);
   const isDeletingRef = useRef(false);
   const savedTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const reflectionIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     if (articleData) {
@@ -103,14 +115,88 @@ export default function Article({
     await updateIcon({ articleId, icon: iconName });
   };
 
+  const loadReflection = async (options?: { force?: boolean }) => {
+    setReflectionError(null);
+    if (!options?.force && reflection) return;
+    setIsReflectionLoading(true);
+    try {
+      const result = await getReflection({ articleId });
+      setReflection(result);
+    } catch (_err) {
+      setReflectionError(
+        "Could not generate a reflection right now. Please try again in a moment.",
+      );
+    } finally {
+      setIsReflectionLoading(false);
+    }
+  };
+
+  // Auto-refresh reflection roughly once a minute while the dialog is open
+  useEffect(() => {
+    if (!showReflectionDialog) {
+      if (reflectionIntervalRef.current) {
+        clearInterval(reflectionIntervalRef.current);
+        reflectionIntervalRef.current = undefined;
+      }
+      return;
+    }
+
+    // Immediately load (or refresh) when opening
+    void loadReflection({ force: true });
+
+    reflectionIntervalRef.current = setInterval(() => {
+      void loadReflection({ force: true });
+    }, 30_000);
+
+    return () => {
+      if (reflectionIntervalRef.current) {
+        clearInterval(reflectionIntervalRef.current);
+        reflectionIntervalRef.current = undefined;
+      }
+    };
+  }, [showReflectionDialog, articleId]);
+
   if (!articleData) {
     return <ArticleSkeleton />;
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-8 py-4 flex justify-between items-center">
+    <div className="fixed inset-0 overflow-hidden">
+      <AIReflectionDialog
+        isOpen={showReflectionDialog}
+        onClose={() => setShowReflectionDialog(false)}
+        onReload={() => {
+          void loadReflection({ force: true });
+        }}
+        onEditPrompt={() => setShowEditPromptDialog(true)}
+        reflection={reflection}
+        isLoading={isReflectionLoading}
+        error={reflectionError}
+        height={reflectionHeight}
+        onHeightChange={setReflectionHeight}
+      />
+      
+      <EditPromptDialog
+        isOpen={showEditPromptDialog}
+        onClose={() => setShowEditPromptDialog(false)}
+        currentPrompt={userPrompt ?? null}
+        onSave={async (prompt) => {
+          await updateAiPrompt({ prompt });
+          // Reload reflection with new prompt
+          if (showReflectionDialog) {
+            await loadReflection({ force: true });
+          }
+        }}
+      />
+      
+      <div 
+        className="absolute inset-0 overflow-y-auto"
+        style={{ 
+          top: showReflectionDialog ? `${reflectionHeight}px` : '0'
+        }}
+      >
+        <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-sm">
+          <div className="max-w-4xl mx-auto px-8 py-4 flex justify-between items-center">
           <button
             onClick={() => {
               setIsNavigatingBack(true);
@@ -143,6 +229,18 @@ export default function Article({
               >
                 <MenuItem>
                   <button
+                    onClick={async () => {
+                      setShowReflectionDialog(true);
+                      await loadReflection();
+                    }}
+                    className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-gray-100 data-focus:bg-white/10"
+                  >
+                    <Sparkles size={16} className="text-purple-300" />
+                    AI reflection
+                  </button>
+                </MenuItem>
+                <MenuItem>
+                  <button
                     onClick={() => setShowDeleteDialog(true)}
                     className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-red-400 data-focus:bg-white/10"
                   >
@@ -156,7 +254,7 @@ export default function Article({
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto min-h-screen">
         <div className="px-8 py-4 space-y-1">
           <div className="mb-2">
             <IconPicker currentIcon={articleData.icon} onSelect={handleIconChange} />
@@ -201,6 +299,7 @@ export default function Article({
         onConfirm={handleDelete}
         articleTitle={articleData.title !== "Untitled" ? `"${articleData.title}"` : "this article"}
       />
+      </div>
     </div>
   );
 }

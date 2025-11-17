@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalQuery } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
 import { Doc } from "./_generated/dataModel";
@@ -340,6 +340,50 @@ export const deleteArticle = mutation({
 
     await ctx.db.delete(args.articleId);
     return null;
+  },
+});
+
+/**
+ * Internal query: Get a single article by ID for use in actions.
+ * Only returns the article if it belongs to the current user.
+ */
+export const getArticleForReflection = internalQuery({
+  args: { articleId: v.id("articles") },
+  returns: v.union(
+    v.object({
+      _id: v.id("articles"),
+      _creationTime: v.number(),
+      createdAt: v.number(),
+      title: v.string(),
+      content: v.string(),
+      userId: v.id("users"),
+      icon: v.optional(v.string()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not authenticated");
+    }
+
+    const article = await ctx.db.get(args.articleId);
+    
+    // Only return article if it belongs to the current user
+    if (!article || article.userId !== userId) {
+      return null;
+    }
+
+    // Return article without embedding (not needed for reflection)
+    return {
+      _id: article._id,
+      _creationTime: article._creationTime,
+      createdAt: article.createdAt,
+      title: article.title,
+      content: article.content,
+      userId: article.userId,
+      icon: article.icon,
+    };
   },
 });
 
