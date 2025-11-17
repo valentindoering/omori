@@ -1,6 +1,6 @@
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-[100dvh] bg-[#191919] text-[#E3E2E0]">
+    <div className="min-h-[100dvh] text-[#E3E2E0]">
       <div className="max-w-3xl mx-auto px-6 py-16">
         <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
         <p className="text-sm text-gray-400 mb-8">Last updated: {new Date().toLocaleDateString()}</p>

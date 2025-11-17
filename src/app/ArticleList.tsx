@@ -70,16 +70,20 @@ export default function ArticleList() {
   return (
     <div className="h-[100dvh] flex flex-col overflow-x-hidden">
       <div className="sticky top-0 z-10 bg-background flex-shrink-0">
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-2 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image src="/favicon.ico" alt="omori logo" width={28} height={28} className="rounded" />
-            <h1 className="text-3xl font-bold mb-1">omori</h1>
+            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-[0_14px_40px_rgba(0,0,0,0.55)] backdrop-blur-md">
+              <Image src="/favicon.ico" alt="omori logo" width={22} height={22} className="rounded" />
+            </div>
+            <span className="text-xs md:text-sm tracking-[0.25em] uppercase text-gray-500">
+              omori
+            </span>
           </div>
           <UserMenu />
         </div>
 
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
-          <div className="flex items-center justify-end mb-2">
+          <div className="flex items-center justify-end mb-4">
             <div className="flex items-center">
               <SearchControls
                 state={state}

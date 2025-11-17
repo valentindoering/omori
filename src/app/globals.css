@@ -11,7 +11,7 @@
 
 html {
   /* Ensure background extends into safe areas */
-  background: var(--background);
+  background: linear-gradient(to bottom, #050506, #101011, #181819);
   /* Prevent horizontal scrolling */
   overflow-x: hidden;
   /* Use dynamic viewport height for better mobile support */
@@ -19,7 +19,7 @@ html {
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(to bottom, #050506, #101011, #181819);
   color: var(--foreground);
   /* Use safe area insets to prevent content from being hidden behind notch */
   padding-top: env(safe-area-inset-top);

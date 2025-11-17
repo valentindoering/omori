@@ -12,14 +12,14 @@ export function AuthWrapper({ children }: { children: ReactNode }) {
   return (
     <>
       <Unauthenticated>
-        <div className="min-h-[100dvh] bg-[#191919] text-[#E3E2E0] flex flex-col items-center justify-center px-6">
+        <div className="min-h-[100dvh] bg-gradient-to-b from-[#050506] via-[#101011] to-[#181819] text-[#E3E2E0] flex flex-col items-center justify-center px-6">
           {/* Main content */}
-          <main className="w-full max-w-5xl">
+          <main className="w-full max-w-5xl py-10 md:py-14">
             <div className="flex flex-col md:flex-row items-center justify-between gap-12 md:gap-16">
               {/* Centered logo, title, copy, single sign-in button */}
               <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start gap-6">
                 <div className="flex flex-col items-center md:items-start gap-3">
-                  <div className="w-14 h-14 rounded-xl bg-[#222222] flex items-center justify-center shadow-sm">
+                  <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-[0_18px_60px_rgba(0,0,0,0.6)] backdrop-blur-md">
                     <Image
                       src="/favicon.ico"
                       alt="omori logo"
@@ -72,7 +72,7 @@ export function AuthWrapper({ children }: { children: ReactNode }) {
               {/* Feature list, always visible */}
               <div className="flex-1">
                 <div className="grid gap-4">
-                  <div className="rounded-xl border border-white/5 bg-white/5 px-4 py-4">
+                  <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-4 shadow-[0_18px_60px_rgba(0,0,0,0.35)]">
                     <div className="flex items-start gap-3">
                       <div className="mt-1 w-7 h-7 rounded-full bg-[#2a2a2a] flex items-center justify-center">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,7 +88,7 @@ export function AuthWrapper({ children }: { children: ReactNode }) {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-white/5 bg-white/5 px-4 py-4">
+                  <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-4 shadow-[0_18px_60px_rgba(0,0,0,0.35)]">
                     <div className="flex items-start gap-3">
                       <div className="mt-1 w-7 h-7 rounded-full bg-[#2a2a2a] flex items-center justify-center">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,7 +104,7 @@ export function AuthWrapper({ children }: { children: ReactNode }) {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-white/5 bg-white/5 px-4 py-4">
+                  <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-4 shadow-[0_18px_60px_rgba(0,0,0,0.35)]">
                     <div className="flex items-start gap-3">
                       <div className="mt-1 w-7 h-7 rounded-full bg-[#2a2a2a] flex items-center justify-center">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
