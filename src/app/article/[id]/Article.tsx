@@ -3,7 +3,7 @@
 import { Editor } from "@/components/Editor";
 import { DeleteArticleDialog } from "@/components/DeleteArticleDialog";
 import { IconPicker } from "@/components/IconPicker";
-import { AIReflectionDialog } from "@/components/AIReflectionDialog";
+import { AIReflectionDialog, PanelPosition } from "@/components/AIReflectionDialog";
 import { EditPromptDialog } from "@/components/EditPromptDialog";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -44,12 +44,47 @@ export default function Article({
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [isNavigatingBack, setIsNavigatingBack] = useState(false);
   const [reflectionHeight, setReflectionHeight] = useState(250);
+  const [panelPosition, setPanelPosition] = useState<PanelPosition>("top");
   const titleInputRef = useRef<HTMLTextAreaElement>(null);
   const titleSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const editorRef = useRef<ReturnType<typeof import("@tiptap/react").useEditor> | null>(null);
   const isDeletingRef = useRef(false);
   const savedTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const reflectionIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  // Initialize position from localStorage with responsive defaults
+  useEffect(() => {
+    const stored = localStorage.getItem("aiReflectionPanelPosition") as PanelPosition | null;
+    if (stored && ["top", "bottom", "right"].includes(stored)) {
+      setPanelPosition(stored);
+    } else {
+      // Responsive default: mobile = top, desktop = right
+      const isMobile = window.innerWidth < 768;
+      const defaultPosition: PanelPosition = isMobile ? "top" : "right";
+      setPanelPosition(defaultPosition);
+      localStorage.setItem("aiReflectionPanelPosition", defaultPosition);
+    }
+  }, []);
+
+  // Update default height based on position
+  useEffect(() => {
+    if (panelPosition === "right" && reflectionHeight === 250) {
+      setReflectionHeight(400); // Default width for right sidebar
+    } else if (panelPosition !== "right" && reflectionHeight === 400) {
+      setReflectionHeight(250); // Default height for top/bottom
+    }
+  }, [panelPosition, reflectionHeight]);
+
+  const handlePositionChange = useCallback((position: PanelPosition) => {
+    setPanelPosition(position);
+    localStorage.setItem("aiReflectionPanelPosition", position);
+    // Adjust default size when switching positions
+    if (position === "right") {
+      setReflectionHeight(400);
+    } else {
+      setReflectionHeight(250);
+    }
+  }, []);
 
   useEffect(() => {
     if (articleData) {
@@ -160,6 +195,27 @@ export default function Article({
     return <ArticleSkeleton />;
   }
 
+  // Calculate content area styles based on panel position
+  const getContentAreaStyle = (): React.CSSProperties => {
+    if (!showReflectionDialog) {
+      return {};
+    }
+
+    if (panelPosition === "right") {
+      return {
+        right: `${reflectionHeight}px`,
+      };
+    } else if (panelPosition === "bottom") {
+      return {
+        bottom: `${reflectionHeight}px`,
+      };
+    } else {
+      return {
+        top: `${reflectionHeight}px`,
+      };
+    }
+  };
+
   return (
     <div className="fixed inset-0 overflow-hidden">
       <AIReflectionDialog
@@ -174,6 +230,8 @@ export default function Article({
         error={reflectionError}
         height={reflectionHeight}
         onHeightChange={setReflectionHeight}
+        position={panelPosition}
+        onPositionChange={handlePositionChange}
       />
       
       <EditPromptDialog
@@ -191,9 +249,7 @@ export default function Article({
       
       <div 
         className="absolute inset-0 overflow-y-auto"
-        style={{ 
-          top: showReflectionDialog ? `${reflectionHeight}px` : '0'
-        }}
+        style={getContentAreaStyle()}
       >
         <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-sm">
           <div className="max-w-4xl mx-auto px-8 py-4 flex justify-between items-center">
