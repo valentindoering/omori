@@ -20,6 +20,20 @@ export default defineSchema({
     aiPrompt: v.optional(v.string()), // Custom AI prompt for reflections
   }).index("by_user", ["userId"]),
   
+  notionOAuthStates: defineTable({
+    state: v.string(), // Random state token for OAuth CSRF protection
+    userId: v.id("users"), // User who initiated OAuth flow
+    expiresAt: v.number(), // Expiration timestamp (states expire after 10 minutes)
+  }).index("by_state", ["state"]),
+  
+  notionConnections: defineTable({
+    userId: v.id("users"),
+    accessToken: v.string(), // Notion OAuth access token
+    workspaceName: v.optional(v.string()), // Notion workspace name
+    workspaceIcon: v.optional(v.string()), // Notion workspace icon
+    botId: v.optional(v.string()), // Notion bot ID
+  }).index("by_user", ["userId"]),
+  
   articles: defineTable({
     title: v.string(),
     content: v.string(), // Stored as JSON string from TipTap

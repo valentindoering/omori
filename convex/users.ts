@@ -3,6 +3,18 @@ import { query, mutation, internalQuery } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 /**
+ * Get the current authenticated user's ID.
+ * Returns null if not authenticated.
+ */
+export const getCurrentUserId = query({
+  args: {},
+  returns: v.union(v.id("users"), v.null()),
+  handler: async (ctx) => {
+    return await getAuthUserId(ctx);
+  },
+});
+
+/**
  * Get the current authenticated user's information.
  * Returns null if not authenticated.
  */

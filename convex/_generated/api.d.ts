@@ -14,6 +14,9 @@ import type * as auth from "../auth.js";
 import type * as embeddings from "../embeddings.js";
 import type * as embeddings_qm from "../embeddings_qm.js";
 import type * as http from "../http.js";
+import type * as notion from "../notion.js";
+import type * as notionOAuth from "../notionOAuth.js";
+import type * as notionOAuthState from "../notionOAuthState.js";
 import type * as users from "../users.js";
 
 import type {
@@ -37,6 +40,9 @@ declare const fullApi: ApiFromModules<{
   embeddings: typeof embeddings;
   embeddings_qm: typeof embeddings_qm;
   http: typeof http;
+  notion: typeof notion;
+  notionOAuth: typeof notionOAuth;
+  notionOAuthState: typeof notionOAuthState;
   users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
