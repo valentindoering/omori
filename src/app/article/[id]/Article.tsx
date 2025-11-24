@@ -220,74 +220,74 @@ export default function Article({
         style={getContentAreaStyle()}
       >
         <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto px-8 py-4 flex justify-between items-center">
-          <button
-            onClick={() => {
-              setIsNavigatingBack(true);
-              router.push("/");
-            }}
-            disabled={isNavigatingBack}
-            className={`text-gray-400 hover:text-white transition-all duration-150 disabled:cursor-wait ${
-              isNavigatingBack ? "opacity-70 scale-[0.90]" : "disabled:opacity-50"
-            }`}
-          >
-            {isNavigatingBack ? (
-              <Loader2 size={24} className="animate-spin" />
-            ) : (
-              <ChevronLeft size={24} />
-            )}
-          </button>
-          
-          <div className="flex items-center gap-4">
-            <SaveIndicator status={saveStatus} />
+          <div className="px-8 py-4 flex justify-between items-center">
+            <button
+              onClick={() => {
+                setIsNavigatingBack(true);
+                router.push("/");
+              }}
+              disabled={isNavigatingBack}
+              className={`text-gray-400 hover:text-white transition-all duration-150 disabled:cursor-wait ${
+                isNavigatingBack ? "opacity-70 scale-[0.90]" : "disabled:opacity-50"
+              }`}
+            >
+              {isNavigatingBack ? (
+                <Loader2 size={24} className="animate-spin" />
+              ) : (
+                <ChevronLeft size={24} />
+              )}
+            </button>
             
-            <Menu>
-              <MenuButton className="text-gray-400 hover:text-white transition-colors">
-                <MoreVertical size={20} />
-              </MenuButton>
+            <div className="flex items-center gap-4">
+              <SaveIndicator status={saveStatus} />
               
-              <MenuItems
-                transition
-                anchor="bottom end"
-                className="w-52 origin-top-right rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm p-1 text-sm transition duration-100 ease-out [--anchor-gap:4px] focus:outline-none data-closed:scale-95 data-closed:opacity-0 z-50"
-              >
-                <MenuItem>
-                  <button
-                    onClick={() => setShowReflectionDialog(true)}
-                    className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-gray-100 data-focus:bg-white/10"
-                  >
-                    <Sparkles size={16} className="text-purple-300" />
-                    AI assistant
-                  </button>
-                </MenuItem>
-                <MenuItem>
-                  <button
-                    onClick={handleGenerateTitleAndIcon}
-                    disabled={isGeneratingTitleAndIcon}
-                    className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-gray-100 data-focus:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isGeneratingTitleAndIcon ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <Wand2 size={16} className="text-purple-300" />
-                    )}
-                    Generate title & icon
-                  </button>
-                </MenuItem>
-                <MenuItem>
-                  <button
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-red-400 data-focus:bg-white/10"
-                  >
-                    <Trash2 size={16} />
-                    Delete article
-                  </button>
-                </MenuItem>
-              </MenuItems>
-            </Menu>
+              <Menu>
+                <MenuButton className="text-gray-400 hover:text-white transition-colors">
+                  <MoreVertical size={20} />
+                </MenuButton>
+                
+                <MenuItems
+                  transition
+                  anchor="bottom end"
+                  className="w-52 origin-top-right rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm p-1 text-sm transition duration-100 ease-out [--anchor-gap:4px] focus:outline-none data-closed:scale-95 data-closed:opacity-0 z-50"
+                >
+                  <MenuItem>
+                    <button
+                      onClick={() => setShowReflectionDialog(true)}
+                      className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-gray-100 data-focus:bg-white/10"
+                    >
+                      <Sparkles size={16} className="text-purple-300" />
+                      AI assistant
+                    </button>
+                  </MenuItem>
+                  <MenuItem>
+                    <button
+                      onClick={handleGenerateTitleAndIcon}
+                      disabled={isGeneratingTitleAndIcon}
+                      className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-gray-100 data-focus:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isGeneratingTitleAndIcon ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Wand2 size={16} className="text-purple-300" />
+                      )}
+                      Generate title & icon
+                    </button>
+                  </MenuItem>
+                  <MenuItem>
+                    <button
+                      onClick={() => setShowDeleteDialog(true)}
+                      className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-red-400 data-focus:bg-white/10"
+                    >
+                      <Trash2 size={16} />
+                      Delete article
+                    </button>
+                  </MenuItem>
+                </MenuItems>
+              </Menu>
+            </div>
           </div>
         </div>
-      </div>
 
       <div className="max-w-4xl mx-auto min-h-screen">
         <div className="px-8 py-4 space-y-1">
