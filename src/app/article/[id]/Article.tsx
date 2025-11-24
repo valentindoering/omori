@@ -48,6 +48,7 @@ export default function Article({
   const isDeletingRef = useRef(false);
   const savedTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const autoGenerateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const hasInitializedTitleRef = useRef(false);
 
   // Initialize position from localStorage with responsive defaults
   useEffect(() => {
@@ -79,7 +80,9 @@ export default function Article({
   useEffect(() => {
     if (articleData) {
       setTitle(articleData.title);
-      if (articleData.title === "Untitled") {
+      // Only select the title on initial load, not on every update
+      if (articleData.title === "Untitled" && !hasInitializedTitleRef.current) {
+        hasInitializedTitleRef.current = true;
         setTimeout(() => titleInputRef.current?.select(), 100);
       }
       setTimeout(() => {
