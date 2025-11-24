@@ -4,10 +4,10 @@ import { Editor } from "@/components/Editor";
 import { DeleteArticleDialog } from "@/components/DeleteArticleDialog";
 import { IconPicker } from "@/components/IconPicker";
 import { AIReflectionDialog, PanelPosition } from "@/components/AIReflectionDialog";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, MoreVertical, Trash2, Check, Loader2, Sparkles } from "lucide-react";
+import { ChevronLeft, MoreVertical, Trash2, Check, Loader2, Sparkles, Wand2 } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -29,6 +29,7 @@ export default function Article({
   const updateContent = useMutation(api.articles.updateContent);
   const updateIcon = useMutation(api.articles.updateIcon);
   const deleteArticle = useMutation(api.articles.deleteArticle);
+  const generateTitleAndIcon = useAction(api.aiReflection.generateTitleAndIcon);
 
   const [title, setTitle] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -37,6 +38,7 @@ export default function Article({
   const [isNavigatingBack, setIsNavigatingBack] = useState(false);
   const [reflectionHeight, setReflectionHeight] = useState(200);
   const [panelPosition, setPanelPosition] = useState<PanelPosition>("top");
+  const [isGeneratingTitleAndIcon, setIsGeneratingTitleAndIcon] = useState(false);
   const titleInputRef = useRef<HTMLTextAreaElement>(null);
   const titleSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const editorRef = useRef<ReturnType<typeof import("@tiptap/react").useEditor> | null>(null);
@@ -134,6 +136,22 @@ export default function Article({
     await updateIcon({ articleId, icon: iconName });
   };
 
+  const handleGenerateTitleAndIcon = async () => {
+    setIsGeneratingTitleAndIcon(true);
+    try {
+      const result = await generateTitleAndIcon({ articleId });
+      await Promise.all([
+        updateTitle({ articleId, title: result.title }),
+        updateIcon({ articleId, icon: result.icon }),
+      ]);
+      setTitle(result.title);
+    } catch (err) {
+      console.error("Failed to generate title and icon:", err);
+    } finally {
+      setIsGeneratingTitleAndIcon(false);
+    }
+  };
+
   if (!articleData) {
     return <ArticleSkeleton />;
   }
@@ -214,6 +232,20 @@ export default function Article({
                   >
                     <Sparkles size={16} className="text-purple-300" />
                     AI assistant
+                  </button>
+                </MenuItem>
+                <MenuItem>
+                  <button
+                    onClick={handleGenerateTitleAndIcon}
+                    disabled={isGeneratingTitleAndIcon}
+                    className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-gray-100 data-focus:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isGeneratingTitleAndIcon ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Wand2 size={16} className="text-purple-300" />
+                    )}
+                    Generate title & icon
                   </button>
                 </MenuItem>
                 <MenuItem>
