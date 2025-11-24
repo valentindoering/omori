@@ -178,6 +178,78 @@ export default function Article({
     };
   }, [articleData, articleId, isGeneratingTitleAndIcon, handleGenerateTitleAndIcon]);
 
+  // Keyboard navigation for focusing title and editor
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeElement = document.activeElement;
+      
+      // Escape to blur/unfocus
+      if (e.key === "Escape") {
+        if (activeElement instanceof HTMLElement) {
+          activeElement.blur();
+        }
+        return;
+      }
+
+      // Arrow Down navigation
+      if (e.key === "ArrowDown") {
+        // Check if we're in the editor (contenteditable element)
+        const isInEditor = activeElement?.getAttribute('contenteditable') === 'true' ||
+                          activeElement?.closest('[contenteditable="true"]');
+        
+        // If in the editor, let Arrow Down work normally (line by line)
+        if (isInEditor) {
+          return;
+        }
+
+        // If in title, move to editor
+        if (activeElement === titleInputRef.current) {
+          e.preventDefault();
+          editorRef.current?.commands.focus();
+          return;
+        }
+
+        // If not in any text input, focus title
+        const isInTextInput = 
+          activeElement instanceof HTMLInputElement ||
+          activeElement instanceof HTMLTextAreaElement;
+        
+        if (!isInTextInput) {
+          e.preventDefault();
+          titleInputRef.current?.focus();
+        }
+      }
+
+      // Arrow Up from editor top -> go back to title
+      if (e.key === "ArrowUp") {
+        const isInEditor = activeElement?.getAttribute('contenteditable') === 'true' ||
+                          activeElement?.closest('[contenteditable="true"]');
+        
+        if (isInEditor && editorRef.current) {
+          const { from, $anchor } = editorRef.current.state.selection;
+          // Check if cursor is at the beginning of the first line
+          // We check if we're at position 0 OR if we're in the first text block at its start
+          const atStart = from <= 1 || ($anchor.parentOffset === 0 && $anchor.parent.isTextblock && $anchor.start() <= 1);
+          
+          if (atStart) {
+            e.preventDefault();
+            titleInputRef.current?.focus();
+            // Move cursor to end of title
+            setTimeout(() => {
+              if (titleInputRef.current) {
+                const length = titleInputRef.current.value.length;
+                titleInputRef.current.setSelectionRange(length, length);
+              }
+            }, 0);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   if (!articleData) {
     return <ArticleSkeleton />;
   }

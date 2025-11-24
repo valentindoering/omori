@@ -34,6 +34,14 @@ export function SearchControl({
     if (isOpen) inputRef.current?.focus();
   }, [isOpen]);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      inputRef.current?.blur();
+      onToggle();
+    }
+  };
+
   return (
     <>
       <button
@@ -54,6 +62,7 @@ export function SearchControl({
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="w-full h-10 bg-transparent text-base text-white placeholder-gray-500 px-3 py-0 outline-none focus:outline-none focus:ring-0"
         />

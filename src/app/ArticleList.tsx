@@ -7,7 +7,7 @@ import { api } from "../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import Image from "next/image";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useSearch } from "./useSearch";
 import { SearchControls } from "./SearchControls";
@@ -26,7 +26,9 @@ export default function ArticleList() {
   } = useSearch();
   const [clickedArticleId, setClickedArticleId] = useState<string | null>(null);
   const [isCreatingArticle, setIsCreatingArticle] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const previousResultsRef = useRef<Array<ArticleListItem>>([]);
+  const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   // Use regular paginated query - simple and straightforward
   const { results: searchArticles, status: searchStatus, loadMore: searchLoadMore } = usePaginatedQuery(
@@ -68,6 +70,77 @@ export default function ArticleList() {
     const bottom = target.scrollHeight - target.scrollTop <= target.clientHeight + 100;
     if (bottom && status === "CanLoadMore") void searchLoadMore(10);
   };
+
+  // Reset selected index when results change
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [displayResults]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't handle keyboard events if user is typing in an input/textarea
+      const isTyping = 
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement;
+
+      // 'T' key to create new article
+      if (e.key === "t" && !isTyping) {
+        e.preventDefault();
+        void handleCreateArticle();
+        return;
+      }
+
+      // 'S' key to open search
+      if (e.key === "s" && !isTyping) {
+        e.preventDefault();
+        dispatch({ type: "TOGGLE_TITLE" });
+        return;
+      }
+
+      if (isTyping) {
+        return;
+      }
+
+      if (displayResults.length === 0) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) => {
+          const next = prev < displayResults.length - 1 ? prev + 1 : prev;
+          // Scroll into view
+          const articleId = displayResults[next]?._id;
+          if (articleId) {
+            const element = articleRefs.current.get(articleId);
+            element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+          return next;
+        });
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex((prev) => {
+          const next = prev > 0 ? prev - 1 : prev;
+          // Scroll into view
+          const articleId = displayResults[next]?._id;
+          if (articleId) {
+            const element = articleRefs.current.get(articleId);
+            element?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+          return next;
+        });
+      } else if ((e.key === "Enter" || e.key === "ArrowRight") && selectedIndex >= 0) {
+        e.preventDefault();
+        const article = displayResults[selectedIndex];
+        if (article) {
+          setClickedArticleId(article._id);
+          router.push(`/article/${article._id}`);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [displayResults, selectedIndex, router, dispatch]);
 
   return (
     <div className="h-[100dvh] flex flex-col overflow-x-hidden">
@@ -124,15 +197,23 @@ export default function ArticleList() {
             )
           ) : (
             <div className="space-y-1.5 mb-20">
-              {displayResults.map((article) => (
+              {displayResults.map((article, index) => (
                 <ArticleItem
                   key={article._id}
                   article={article}
                   isPending={clickedArticleId === article._id}
                   showScore={isEmbedSearching}
+                  isSelected={selectedIndex === index}
                   onSelect={() => {
                     setClickedArticleId(article._id);
                     router.push(`/article/${article._id}`);
+                  }}
+                  ref={(el) => {
+                    if (el) {
+                      articleRefs.current.set(article._id, el);
+                    } else {
+                      articleRefs.current.delete(article._id);
+                    }
                   }}
                 />
               ))}
