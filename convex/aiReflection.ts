@@ -6,6 +6,9 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
 
+const MAX_ARTICLE_CHARS = 8000;
+const MAX_CONVERSATION_MESSAGES = 20;
+
 // Simple helper: extract plain text from TipTap JSON string
 function extractPlainTextFromTipTapJson(jsonString: string): string {
   try {
@@ -26,15 +29,35 @@ function extractPlainTextFromTipTapJson(jsonString: string): string {
   }
 }
 
-const DEFAULT_PROMPT = `Read this article and offer sharp insights or questions that help the author think deeper.
-Focus on the ending if relevant.
-Always format your response as bullet points (using - or •).
-Keep it brief - 2-4 bullet points maximum.
-No emojis, no quotes, no preface.`;
+const chatMessageValidator = v.object({
+  role: v.union(v.literal("user"), v.literal("assistant")),
+  content: v.string(),
+});
 
-export const getArticleReflection = action({
+function buildSystemPrompt(
+  articleTitle: string,
+  articleBody: string,
+): string {
+  const trimmedBody =
+    articleBody.length > MAX_ARTICLE_CHARS
+      ? `${articleBody.slice(0, MAX_ARTICLE_CHARS)}\n\n[truncated]`
+      : articleBody;
+
+  const sections = [
+    "You are a calm, minimal writing partner. Keep replies short, clear, and conversational.",
+    "Offer helpful questions, suggestions, or perspective without fluff or emojis.",
+    `Article title: ${articleTitle || "Untitled note"}`,
+    "Article body:",
+    trimmedBody || "No article body was provided.",
+  ];
+
+  return sections.join("\n");
+}
+
+export const chatWithArticle = action({
   args: {
     articleId: v.id("articles"),
+    messages: v.array(chatMessageValidator),
   },
   returns: v.string(),
   handler: async (ctx, args) => {
@@ -45,18 +68,11 @@ export const getArticleReflection = action({
 
     const article = await ctx.runQuery(
       internal.articles.getArticleForReflection,
-      { articleId: args.articleId }
+      { articleId: args.articleId },
     );
     if (!article) {
       throw new Error("Article not found or unauthorized");
     }
-
-    // Get user's custom prompt or use default
-    const userPrompt: string | null = await ctx.runQuery(
-      internal.users.getAiPromptInternal,
-      { userId }
-    );
-    const promptTemplate: string = userPrompt || DEFAULT_PROMPT;
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
@@ -68,46 +84,33 @@ export const getArticleReflection = action({
     const plainText: string = extractPlainTextFromTipTapJson(article.content);
     const fullSource: string =
       plainText || article.title || "Untitled note";
-    const baseText: string = fullSource
 
-    // Put extra emphasis on how the article ends (last few paragraphs)
-    const paragraphs = fullSource.split(/\n{2,}/);
-    const tailText =
-      paragraphs.length > 1
-        ? paragraphs.slice(-3).join("\n\n")
-        : baseText;
+    const systemPrompt = buildSystemPrompt(
+      article.title ?? "Untitled note",
+      fullSource,
+    );
 
-    const prompt: string = [
-      promptTemplate,
-      "",
-      "Article:",
-      baseText,
-      "",
-      "Ending:",
-      tailText,
-    ].join("\n");
+    const recentMessages = args.messages.slice(-MAX_CONVERSATION_MESSAGES);
 
     const completion = await client.chat.completions.create({
       model: "gpt-5.1",
+      temperature: 0.6,
       messages: [
-        {
-          role: "system",
-          content:
-            "You are a sharp thinking partner. Respond in 2-3 sentences maximum. One key insight or question that adds real value. No quotes, no emojis, no preface.",
-        },
-        { role: "user", content: prompt },
+        { role: "system", content: systemPrompt },
+        ...recentMessages.map((message) => ({
+          role: message.role,
+          content: message.content,
+        })),
       ],
-      temperature: 0.8,
     });
 
     const message = completion.choices[0]?.message?.content;
 
     if (!message || typeof message !== "string") {
-      return "Let this page nudge you toward one small, kind step that matters today.";
+      return "I'm here, but I couldn't form a response. Try asking again?";
     }
 
     return message.trim();
   },
 });
-
 

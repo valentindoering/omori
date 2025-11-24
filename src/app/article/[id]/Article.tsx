@@ -4,8 +4,7 @@ import { Editor } from "@/components/Editor";
 import { DeleteArticleDialog } from "@/components/DeleteArticleDialog";
 import { IconPicker } from "@/components/IconPicker";
 import { AIReflectionDialog, PanelPosition } from "@/components/AIReflectionDialog";
-import { EditPromptDialog } from "@/components/EditPromptDialog";
-import { useAction, useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, MoreVertical, Trash2, Check, Loader2, Sparkles } from "lucide-react";
@@ -30,59 +29,44 @@ export default function Article({
   const updateContent = useMutation(api.articles.updateContent);
   const updateIcon = useMutation(api.articles.updateIcon);
   const deleteArticle = useMutation(api.articles.deleteArticle);
-  const getReflection = useAction(api.aiReflection.getArticleReflection);
-  const updateAiPrompt = useMutation(api.users.updateAiPrompt);
-  const userPrompt = useQuery(api.users.getAiPrompt);
 
   const [title, setTitle] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showReflectionDialog, setShowReflectionDialog] = useState(false);
-  const [showEditPromptDialog, setShowEditPromptDialog] = useState(false);
-  const [reflection, setReflection] = useState<string | null>(null);
-  const [reflectionError, setReflectionError] = useState<string | null>(null);
-  const [isReflectionLoading, setIsReflectionLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [isNavigatingBack, setIsNavigatingBack] = useState(false);
-  const [reflectionHeight, setReflectionHeight] = useState(250);
+  const [reflectionHeight, setReflectionHeight] = useState(200);
   const [panelPosition, setPanelPosition] = useState<PanelPosition>("top");
   const titleInputRef = useRef<HTMLTextAreaElement>(null);
   const titleSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const editorRef = useRef<ReturnType<typeof import("@tiptap/react").useEditor> | null>(null);
   const isDeletingRef = useRef(false);
   const savedTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-  const reflectionIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Initialize position from localStorage with responsive defaults
   useEffect(() => {
     const stored = localStorage.getItem("aiReflectionPanelPosition") as PanelPosition | null;
+    let initialPosition: PanelPosition | null = null;
     if (stored && ["top", "bottom", "right"].includes(stored)) {
-      setPanelPosition(stored);
+      initialPosition = stored;
     } else {
-      // Responsive default: mobile = top, desktop = right
       const isMobile = window.innerWidth < 768;
-      const defaultPosition: PanelPosition = isMobile ? "top" : "right";
-      setPanelPosition(defaultPosition);
-      localStorage.setItem("aiReflectionPanelPosition", defaultPosition);
+      initialPosition = isMobile ? "top" : "right";
+      localStorage.setItem("aiReflectionPanelPosition", initialPosition);
+    }
+    if (initialPosition) {
+      setPanelPosition(initialPosition);
+      setReflectionHeight(initialPosition === "right" ? 320 : 200);
     }
   }, []);
-
-  // Update default height based on position
-  useEffect(() => {
-    if (panelPosition === "right" && reflectionHeight === 250) {
-      setReflectionHeight(400); // Default width for right sidebar
-    } else if (panelPosition !== "right" && reflectionHeight === 400) {
-      setReflectionHeight(250); // Default height for top/bottom
-    }
-  }, [panelPosition, reflectionHeight]);
 
   const handlePositionChange = useCallback((position: PanelPosition) => {
     setPanelPosition(position);
     localStorage.setItem("aiReflectionPanelPosition", position);
-    // Adjust default size when switching positions
     if (position === "right") {
-      setReflectionHeight(400);
+      setReflectionHeight(320);
     } else {
-      setReflectionHeight(250);
+      setReflectionHeight(200);
     }
   }, []);
 
@@ -150,47 +134,6 @@ export default function Article({
     await updateIcon({ articleId, icon: iconName });
   };
 
-  const loadReflection = useCallback(async (options?: { force?: boolean }) => {
-    setReflectionError(null);
-    if (!options?.force && reflection) return;
-    setIsReflectionLoading(true);
-    try {
-      const result = await getReflection({ articleId });
-      setReflection(result);
-    } catch {
-      setReflectionError(
-        "Could not generate a reflection right now. Please try again in a moment.",
-      );
-    } finally {
-      setIsReflectionLoading(false);
-    }
-  }, [reflection, getReflection, articleId]);
-
-  // Auto-refresh reflection roughly once a minute while the dialog is open
-  useEffect(() => {
-    if (!showReflectionDialog) {
-      if (reflectionIntervalRef.current) {
-        clearInterval(reflectionIntervalRef.current);
-        reflectionIntervalRef.current = undefined;
-      }
-      return;
-    }
-
-    // Immediately load (or refresh) when opening
-    void loadReflection({ force: true });
-
-    reflectionIntervalRef.current = setInterval(() => {
-      void loadReflection({ force: true });
-    }, 30_000);
-
-    return () => {
-      if (reflectionIntervalRef.current) {
-        clearInterval(reflectionIntervalRef.current);
-        reflectionIntervalRef.current = undefined;
-      }
-    };
-  }, [showReflectionDialog, articleId, loadReflection]);
-
   if (!articleData) {
     return <ArticleSkeleton />;
   }
@@ -219,32 +162,13 @@ export default function Article({
   return (
     <div className="fixed inset-0 overflow-hidden">
       <AIReflectionDialog
+        articleId={articleId}
         isOpen={showReflectionDialog}
         onClose={() => setShowReflectionDialog(false)}
-        onReload={() => {
-          void loadReflection({ force: true });
-        }}
-        onEditPrompt={() => setShowEditPromptDialog(true)}
-        reflection={reflection}
-        isLoading={isReflectionLoading}
-        error={reflectionError}
         height={reflectionHeight}
         onHeightChange={setReflectionHeight}
         position={panelPosition}
         onPositionChange={handlePositionChange}
-      />
-      
-      <EditPromptDialog
-        isOpen={showEditPromptDialog}
-        onClose={() => setShowEditPromptDialog(false)}
-        currentPrompt={userPrompt ?? null}
-        onSave={async (prompt) => {
-          await updateAiPrompt({ prompt });
-          // Reload reflection with new prompt
-          if (showReflectionDialog) {
-            await loadReflection({ force: true });
-          }
-        }}
       />
       
       <div 
@@ -285,14 +209,11 @@ export default function Article({
               >
                 <MenuItem>
                   <button
-                    onClick={async () => {
-                      setShowReflectionDialog(true);
-                      await loadReflection();
-                    }}
+                    onClick={() => setShowReflectionDialog(true)}
                     className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-gray-100 data-focus:bg-white/10"
                   >
                     <Sparkles size={16} className="text-purple-300" />
-                    AI reflection
+                    AI assistant
                   </button>
                 </MenuItem>
                 <MenuItem>
