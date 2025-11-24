@@ -1,8 +1,9 @@
 import { v } from "convex/values";
-import { mutation, query, internalQuery } from "./_generated/server";
+import { mutation, query, internalQuery, action } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
 import { Doc } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
 
 // All available icons from the icon picker
 const ALL_ICONS = [
@@ -384,6 +385,47 @@ export const getArticleForReflection = internalQuery({
       userId: article.userId,
       icon: article.icon,
     };
+  },
+});
+
+/**
+ * Save an article to Notion.
+ * Public action that users can call from the UI.
+ */
+export const saveToNotion = action({
+  args: {
+    articleId: v.id("articles"),
+  },
+  returns: v.object({
+    success: v.boolean(),
+    pageUrl: v.optional(v.string()),
+    error: v.optional(v.string()),
+  }),
+  handler: async (ctx, args): Promise<{
+    success: boolean;
+    pageUrl?: string;
+    error?: string;
+  }> => {
+    // Get the current user
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return {
+        success: false,
+        error: "Not authenticated",
+      };
+    }
+
+    // Call the internal action to save to Notion
+    const result: {
+      success: boolean;
+      pageUrl?: string;
+      error?: string;
+    } = await ctx.runAction(internal.notionApi.saveArticleToNotion, {
+      articleId: args.articleId,
+      userId,
+    });
+
+    return result;
   },
 });
 

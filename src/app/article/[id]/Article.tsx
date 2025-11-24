@@ -7,7 +7,7 @@ import { AIReflectionDialog, PanelPosition } from "@/components/AIReflectionDial
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, MoreVertical, Trash2, Check, Loader2, Sparkles, Wand2 } from "lucide-react";
+import { ChevronLeft, MoreVertical, Trash2, Check, Loader2, Sparkles, Wand2, Share2 } from "lucide-react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -30,6 +30,8 @@ export default function Article({
   const updateIcon = useMutation(api.articles.updateIcon);
   const deleteArticle = useMutation(api.articles.deleteArticle);
   const generateTitleAndIcon = useAction(api.aiReflection.generateTitleAndIcon);
+  const saveToNotion = useAction(api.articles.saveToNotion);
+  const notionConnection = useQuery(api.notion.getConnection);
 
   const [title, setTitle] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -39,6 +41,7 @@ export default function Article({
   const [reflectionHeight, setReflectionHeight] = useState(200);
   const [panelPosition, setPanelPosition] = useState<PanelPosition>("top");
   const [isGeneratingTitleAndIcon, setIsGeneratingTitleAndIcon] = useState(false);
+  const [isSavingToNotion, setIsSavingToNotion] = useState(false);
   const titleInputRef = useRef<HTMLTextAreaElement>(null);
   const titleSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const editorRef = useRef<ReturnType<typeof import("@tiptap/react").useEditor> | null>(null);
@@ -157,6 +160,36 @@ export default function Article({
       setIsGeneratingTitleAndIcon(false);
     }
   }, [articleId, generateTitleAndIcon, updateTitle, updateIcon]);
+
+  const handleSaveToNotion = async () => {
+    if (!notionConnection) {
+      alert("Please connect your Notion account first from the user menu.");
+      return;
+    }
+
+    if (!notionConnection.selectedDatabaseId) {
+      alert("Please select a Notion database first from the user menu.");
+      return;
+    }
+
+    setIsSavingToNotion(true);
+    try {
+      const result = await saveToNotion({ articleId });
+      if (result.success && result.pageUrl) {
+        // Show success message with link
+        if (confirm(`Article saved to Notion!\n\nWould you like to open it in Notion?`)) {
+          window.open(result.pageUrl, '_blank');
+        }
+      } else {
+        alert(`Failed to save to Notion: ${result.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Failed to save to Notion:", error);
+      alert("Failed to save to Notion. Please try again.");
+    } finally {
+      setIsSavingToNotion(false);
+    }
+  };
 
   // Auto-generate title and icon after 5 minutes if title is still "Untitled"
   useEffect(() => {
@@ -346,6 +379,22 @@ export default function Article({
                       Generate title & icon
                     </button>
                   </MenuItem>
+                  {notionConnection && notionConnection.selectedDatabaseId && (
+                    <MenuItem>
+                      <button
+                        onClick={handleSaveToNotion}
+                        disabled={isSavingToNotion}
+                        className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-gray-100 data-focus:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSavingToNotion ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                          <Share2 size={16} className="text-blue-300" />
+                        )}
+                        Save to Notion
+                      </button>
+                    </MenuItem>
+                  )}
                   <MenuItem>
                     <button
                       onClick={() => setShowDeleteDialog(true)}

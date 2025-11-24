@@ -16,6 +16,8 @@ export const getConnection = query({
       workspaceName: v.optional(v.string()),
       workspaceIcon: v.optional(v.string()),
       botId: v.optional(v.string()),
+      selectedDatabaseId: v.optional(v.string()),
+      selectedDatabaseName: v.optional(v.string()),
     }),
     v.null()
   ),
@@ -75,6 +77,39 @@ export const storeConnection = mutation({
     });
 
     return connectionId;
+  },
+});
+
+/**
+ * Update the selected Notion database for the current user.
+ */
+export const selectDatabase = mutation({
+  args: {
+    databaseId: v.string(),
+    databaseName: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const connection = await ctx.db
+      .query("notionConnections")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!connection) {
+      throw new Error("No Notion connection found");
+    }
+
+    await ctx.db.patch(connection._id, {
+      selectedDatabaseId: args.databaseId,
+      selectedDatabaseName: args.databaseName,
+    });
+
+    return null;
   },
 });
 

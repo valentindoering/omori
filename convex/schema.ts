@@ -32,6 +32,8 @@ export default defineSchema({
     workspaceName: v.optional(v.string()), // Notion workspace name
     workspaceIcon: v.optional(v.string()), // Notion workspace icon
     botId: v.optional(v.string()), // Notion bot ID
+    selectedDatabaseId: v.optional(v.string()), // Selected Notion database ID for saving articles
+    selectedDatabaseName: v.optional(v.string()), // Selected database name for display
   }).index("by_user", ["userId"]),
   
   articles: defineTable({

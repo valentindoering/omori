@@ -1,19 +1,54 @@
 "use client";
 
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface ManageNotionDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+interface Database {
+  id: string;
+  title: string;
+  icon?: string;
+}
+
 export function ManageNotionDialog({ isOpen, onClose }: ManageNotionDialogProps) {
   const notionConnection = useQuery(api.notion.getConnection);
   const disconnectNotion = useMutation(api.notion.disconnectNotion);
   const createState = useMutation(api.notionOAuthState.createState);
+  const fetchDatabases = useAction(api.notionApi.fetchDatabases);
+  const selectDatabase = useMutation(api.notion.selectDatabase);
+
+  const [databases, setDatabases] = useState<Database[]>([]);
+  const [isLoadingDatabases, setIsLoadingDatabases] = useState(false);
+  const [selectedDatabaseId, setSelectedDatabaseId] = useState<string>("");
+  const [isSavingDatabase, setIsSavingDatabase] = useState(false);
+
+  // Fetch databases when dialog opens and user is connected
+  useEffect(() => {
+    if (isOpen && notionConnection) {
+      setIsLoadingDatabases(true);
+      fetchDatabases()
+        .then((dbs) => {
+          setDatabases(dbs);
+          // Set current selection if exists
+          if (notionConnection.selectedDatabaseId) {
+            setSelectedDatabaseId(notionConnection.selectedDatabaseId);
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to fetch databases:", error);
+        })
+        .finally(() => {
+          setIsLoadingDatabases(false);
+        });
+    }
+  }, [isOpen, notionConnection, fetchDatabases]);
 
   const handleConnect = async () => {
     const clientId = process.env.NEXT_PUBLIC_NOTION_OAUTH_CLIENT_ID;
@@ -46,6 +81,25 @@ export function ManageNotionDialog({ isOpen, onClose }: ManageNotionDialogProps)
   const handleDisconnect = async () => {
     if (confirm("Are you sure you want to disconnect your Notion account?")) {
       await disconnectNotion();
+    }
+  };
+
+  const handleSaveDatabase = async () => {
+    if (!selectedDatabaseId || !notionConnection) return;
+
+    setIsSavingDatabase(true);
+    try {
+      const selectedDb = databases.find((db) => db.id === selectedDatabaseId);
+      if (selectedDb) {
+        await selectDatabase({
+          databaseId: selectedDb.id,
+          databaseName: selectedDb.title,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to save database selection:", error);
+    } finally {
+      setIsSavingDatabase(false);
     }
   };
 
@@ -105,11 +159,71 @@ export function ManageNotionDialog({ isOpen, onClose }: ManageNotionDialogProps)
                   </div>
                 </div>
 
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-white">
+                    Select Database
+                  </label>
+                  <p className="text-sm text-gray-400 -mt-2">
+                    Choose a database to save your articles to Notion
+                  </p>
+                  
+                  {isLoadingDatabases ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                      <span className="ml-2 text-sm text-gray-400">Loading databases...</span>
+                    </div>
+                  ) : databases.length > 0 ? (
+                    <div className="space-y-3">
+                      <select
+                        value={selectedDatabaseId}
+                        onChange={(e) => setSelectedDatabaseId(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="" className="bg-zinc-900">
+                          Select a database...
+                        </option>
+                        {databases.map((db) => (
+                          <option key={db.id} value={db.id} className="bg-zinc-900">
+                            {db.icon && `${db.icon} `}{db.title}
+                          </option>
+                        ))}
+                      </select>
+                      
+                      {selectedDatabaseId && (
+                        <button
+                          onClick={handleSaveDatabase}
+                          disabled={isSavingDatabase || selectedDatabaseId === notionConnection.selectedDatabaseId}
+                          className="w-full px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                          {isSavingDatabase ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Saving...
+                            </>
+                          ) : selectedDatabaseId === notionConnection.selectedDatabaseId ? (
+                            "✓ Selected"
+                          ) : (
+                            "Save Selection"
+                          )}
+                        </button>
+                      )}
+                      
+                      {notionConnection.selectedDatabaseName && (
+                        <p className="text-sm text-green-500">
+                          Current: {notionConnection.selectedDatabaseName}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No databases found in your workspace.</p>
+                  )}
+                </div>
+
                 <div className="bg-white/5 rounded-lg p-4 space-y-2">
                   <h4 className="text-sm font-medium text-white">About this connection</h4>
                   <p className="text-sm text-gray-400">
-                    This connection allows you to import pages from your Notion workspace. 
-                    You can disconnect at any time.
+                    This connection allows you to import pages from your Notion workspace
+                    and save articles back to Notion. You can disconnect at any time.
                   </p>
                 </div>
 
