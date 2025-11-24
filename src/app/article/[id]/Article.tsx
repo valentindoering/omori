@@ -44,6 +44,7 @@ export default function Article({
   const editorRef = useRef<ReturnType<typeof import("@tiptap/react").useEditor> | null>(null);
   const isDeletingRef = useRef(false);
   const savedTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const autoGenerateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Initialize position from localStorage with responsive defaults
   useEffect(() => {
@@ -90,6 +91,10 @@ export default function Article({
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
     setSaveStatus('typing');
+    // Clear auto-generation timer if user changes title from "Untitled"
+    if (newTitle && newTitle !== "Untitled" && autoGenerateTimeoutRef.current) {
+      clearTimeout(autoGenerateTimeoutRef.current);
+    }
     if (titleSaveTimeoutRef.current) clearTimeout(titleSaveTimeoutRef.current);
     titleSaveTimeoutRef.current = setTimeout(async () => {
       if (!isDeletingRef.current) {
@@ -121,6 +126,7 @@ export default function Article({
   const handleDelete = async () => {
     isDeletingRef.current = true;
     if (titleSaveTimeoutRef.current) clearTimeout(titleSaveTimeoutRef.current);
+    if (autoGenerateTimeoutRef.current) clearTimeout(autoGenerateTimeoutRef.current);
     await deleteArticle({ articleId });
     router.push("/");
   };
@@ -136,7 +142,7 @@ export default function Article({
     await updateIcon({ articleId, icon: iconName });
   };
 
-  const handleGenerateTitleAndIcon = async () => {
+  const handleGenerateTitleAndIcon = useCallback(async () => {
     setIsGeneratingTitleAndIcon(true);
     try {
       const result = await generateTitleAndIcon({ articleId });
@@ -150,7 +156,27 @@ export default function Article({
     } finally {
       setIsGeneratingTitleAndIcon(false);
     }
-  };
+  }, [articleId, generateTitleAndIcon, updateTitle, updateIcon]);
+
+  // Auto-generate title and icon after 5 minutes if title is still "Untitled"
+  useEffect(() => {
+    if (!articleData || articleData.title !== "Untitled" || isGeneratingTitleAndIcon) {
+      return;
+    }
+
+    autoGenerateTimeoutRef.current = setTimeout(async () => {
+      // Double-check title is still "Untitled" before generating
+      if (!isDeletingRef.current && articleData.title === "Untitled") {
+        await handleGenerateTitleAndIcon();
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => {
+      if (autoGenerateTimeoutRef.current) {
+        clearTimeout(autoGenerateTimeoutRef.current);
+      }
+    };
+  }, [articleData, articleId, isGeneratingTitleAndIcon, handleGenerateTitleAndIcon]);
 
   if (!articleData) {
     return <ArticleSkeleton />;
